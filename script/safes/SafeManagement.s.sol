@@ -10,9 +10,9 @@ import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 
 import {AccessController} from "../../src/access/AccessController.sol";
-import {PantosToken} from "../../src/PantosToken.sol";
+import {VisionToken} from "../../src/VisionToken.sol";
 
-import {PantosBaseAddresses} from "./../helpers/PantosBaseAddresses.s.sol";
+import {VisionBaseAddresses} from "./../helpers/VisionBaseAddresses.s.sol";
 import {SafeAddresses} from "./../helpers/SafeAddresses.s.sol";
 
 /**
@@ -43,7 +43,7 @@ import {SafeAddresses} from "./../helpers/SafeAddresses.s.sol";
  *     --sender <sender> --rpc-url <rpc alias> --slow --force --sig \
  *     "changeThreshold(string,uint256)" <roleName> <newThreshold>
  */
-contract SafeManagement is PantosBaseAddresses, SafeAddresses {
+contract SafeManagement is VisionBaseAddresses, SafeAddresses {
     AccessController accessController;
     IOwnerManager ownerManager;
     address roleAddress;

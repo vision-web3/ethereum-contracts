@@ -1,10 +1,10 @@
-<img src="https://raw.githubusercontent.com/pantos-io/ethereum-contracts/img/pantos-logo-full.svg" alt="Pantos logo" align="right" width="120" />
+<img src="https://raw.githubusercontent.com/vision-web3-foundation/ethereum-contracts/img/vision-logo-full.svg" alt="Vision logo" align="right" width="120" />
 
-[![CI](https://github.com/pantos-io/ethereum-contracts/actions/workflows/ci.yaml/badge.svg)](https://github.com/pantos-io/ethereum-contracts/actions/workflows/ci.yaml) 
+[![CI](https://github.com/vision-web3-foundation/ethereum-contracts/actions/workflows/ci.yaml/badge.svg)](https://github.com/vision-web3-foundation/ethereum-contracts/actions/workflows/ci.yaml) 
 
-# Pantos on-chain components for Ethereum and compatible blockchains
+# Vision on-chain components for Ethereum and compatible blockchains
 
-This repository contains the Pantos smart contracts for Ethereum-compatible
+This repository contains the Vision smart contracts for Ethereum-compatible
 blockchains.
 
 ## Install Foundry 

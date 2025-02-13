@@ -4,34 +4,34 @@ pragma solidity 0.8.26;
 /* solhint-disable no-console*/
 import {console} from "forge-std/console.sol";
 
-import {PantosForwarder} from "../../src/PantosForwarder.sol";
-import {PantosRegistryFacet} from "../../src/facets/PantosRegistryFacet.sol";
-import {PantosTransferFacet} from "../../src/facets/PantosTransferFacet.sol";
+import {VisionForwarder} from "../../src/VisionForwarder.sol";
+import {VisionRegistryFacet} from "../../src/facets/VisionRegistryFacet.sol";
+import {VisionTransferFacet} from "../../src/facets/VisionTransferFacet.sol";
 import {AccessController} from "../../src/access/AccessController.sol";
-import {IPantosHub} from "../../src/interfaces/IPantosHub.sol";
-import {PantosHubProxy} from "../../src/PantosHubProxy.sol";
-import {PantosToken} from "../../src/PantosToken.sol";
-import {PantosWrapper} from "../../src/PantosWrapper.sol";
+import {IVisionHub} from "../../src/interfaces/IVisionHub.sol";
+import {VisionHubProxy} from "../../src/VisionHubProxy.sol";
+import {VisionToken} from "../../src/VisionToken.sol";
+import {VisionWrapper} from "../../src/VisionWrapper.sol";
 
-import {PantosBaseAddresses} from "../helpers/PantosBaseAddresses.s.sol";
-import {PantosHubDeployer} from "../helpers/PantosHubDeployer.s.sol";
-import {PantosForwarderRedeployer} from "../helpers/PantosForwarderRedeployer.s.sol";
+import {VisionBaseAddresses} from "../helpers/VisionBaseAddresses.s.sol";
+import {VisionHubDeployer} from "../helpers/VisionHubDeployer.s.sol";
+import {VisionForwarderRedeployer} from "../helpers/VisionForwarderRedeployer.s.sol";
 import {SafeAddresses} from "../helpers/SafeAddresses.s.sol";
 
 /**
  * @title UpgradeHubAndRedeployForwarder
  *
- * @notice Deploy and upgrade facets of the Pantos Hub and redeploys the
- * Pantos Forwarder. To ensure correct functionality of the newly deployed
- * Pantos Forwarder within the Pantos protocol, the following steps are
+ * @notice Deploy and upgrade facets of the Vision Hub and redeploys the
+ * Vision Forwarder. To ensure correct functionality of the newly deployed
+ * Vision Forwarder within the Vision protocol, the following steps are
  * incorporated into this script:
  *
- * 1. Retrieve the validator address from the Pantos Hub and
- * configure it in the new Pantos Forwarder.
- * 2. Retrieve the Pantos token address from the Pantos Hub and
- * configure it in the new Pantos Forwarder.
- * 3. Configure the new Pantos Forwarder at the Pantos Hub.
- * 4. Configure the new Pantos Forwarder at Pantos, Best and Wrapper tokens.
+ * 1. Retrieve the validator address from the Vision Hub and
+ * configure it in the new Vision Forwarder.
+ * 2. Retrieve the Vision token address from the Vision Hub and
+ * configure it in the new Vision Forwarder.
+ * 3. Configure the new Vision Forwarder at the Vision Hub.
+ * 4. Configure the new Vision Forwarder at Vision, Best and Wrapper tokens.
  * @dev Usage
  * 1. Deploy by any gas paying account:
  * forge script ./script/redeploy/UpgradeHubAndRedeployForwarder.s.sol \
@@ -42,20 +42,20 @@ import {SafeAddresses} from "../helpers/SafeAddresses.s.sol";
  *   --rpc-url <rpc alias> --sig "roleActions() -vvvv"
  */
 contract UpgradeHubAndRedeployForwarder is
-    PantosBaseAddresses,
+    VisionBaseAddresses,
     SafeAddresses,
-    PantosHubDeployer,
-    PantosForwarderRedeployer
+    VisionHubDeployer,
+    VisionForwarderRedeployer
 {
-    PantosHubProxy pantosHubProxy;
-    PantosToken pantosToken;
+    VisionHubProxy visionHubProxy;
+    VisionToken visionToken;
     AccessController accessController;
-    PantosForwarder oldForwarder;
-    PantosWrapper[] tokens;
+    VisionForwarder oldForwarder;
+    VisionWrapper[] tokens;
 
-    PantosRegistryFacet newRegistryFacet;
-    PantosTransferFacet newTransferFacet;
-    PantosForwarder newPantosForwarder;
+    VisionRegistryFacet newRegistryFacet;
+    VisionTransferFacet newTransferFacet;
+    VisionForwarder newVisionForwarder;
 
     function deploy(address accessControllerAddress) public {
         accessController = AccessController(accessControllerAddress);
@@ -63,7 +63,7 @@ contract UpgradeHubAndRedeployForwarder is
         vm.startBroadcast();
         newRegistryFacet = deployRegistryFacet();
         newTransferFacet = deployTransferFacet();
-        newPantosForwarder = deployPantosForwarder(accessController);
+        newVisionForwarder = deployVisionForwarder(accessController);
         vm.stopBroadcast();
 
         exportUpgradedContractAddresses();
@@ -71,31 +71,31 @@ contract UpgradeHubAndRedeployForwarder is
 
     function roleActions() public {
         importContractAddresses();
-        IPantosHub pantosHub = IPantosHub(address(pantosHubProxy));
-        console.log("PantosHub", address(pantosHub));
+        IVisionHub visionHub = IVisionHub(address(visionHubProxy));
+        console.log("VisionHub", address(visionHub));
 
-        uint256 commitmentWaitPeriod = pantosHub.getCommitmentWaitPeriod();
+        uint256 commitmentWaitPeriod = visionHub.getCommitmentWaitPeriod();
 
-        // Ensuring PantosHub is paused at the time of diamond cut
+        // Ensuring VisionHub is paused at the time of diamond cut
         vm.startBroadcast(accessController.pauser());
-        pausePantosHub(pantosHub);
+        pauseVisionHub(visionHub);
         vm.stopBroadcast();
 
         vm.startBroadcast(accessController.deployer());
         diamondCutUpgradeFacets(
-            address(pantosHubProxy),
+            address(visionHubProxy),
             newRegistryFacet,
             newTransferFacet
         );
         vm.stopBroadcast();
 
-        // this will migrate new forwarder at pantosHub
+        // this will migrate new forwarder at visionHub
         vm.startBroadcast(accessController.superCriticalOps());
-        initializePantosHub(
-            pantosHub,
-            newPantosForwarder,
-            pantosToken,
-            pantosHub.getPrimaryValidatorNode(),
+        initializeVisionHub(
+            visionHub,
+            newVisionForwarder,
+            visionToken,
+            visionHub.getPrimaryValidatorNode(),
             commitmentWaitPeriod
         );
         vm.stopBroadcast();
@@ -108,10 +108,10 @@ contract UpgradeHubAndRedeployForwarder is
         );
 
         vm.startBroadcast(accessController.superCriticalOps());
-        initializePantosForwarder(
-            newPantosForwarder,
-            pantosHub,
-            pantosToken,
+        initializeVisionForwarder(
+            newVisionForwarder,
+            visionHub,
+            visionToken,
             minimumValidatorNodeSignatures,
             validatorNodeAddresses
         );
@@ -129,7 +129,7 @@ contract UpgradeHubAndRedeployForwarder is
                 tokens[i].pause();
             }
             vm.startBroadcast(accessController.superCriticalOps());
-            migrateNewForwarderAtToken(newPantosForwarder, tokens[i]);
+            migrateNewForwarderAtToken(newVisionForwarder, tokens[i]);
             vm.stopBroadcast();
         }
         overrideWithRedeployedAddresses();
@@ -148,7 +148,7 @@ contract UpgradeHubAndRedeployForwarder is
         );
         contractAddresses[2] = ContractAddress(
             Contract.FORWARDER,
-            address(newPantosForwarder)
+            address(newVisionForwarder)
         );
         exportContractAddresses(contractAddresses, true);
     }
@@ -158,33 +158,33 @@ contract UpgradeHubAndRedeployForwarder is
         readRedeployedContractAddresses();
 
         // New items
-        newRegistryFacet = PantosRegistryFacet(
+        newRegistryFacet = VisionRegistryFacet(
             getContractAddress(Contract.REGISTRY_FACET, true)
         );
-        newTransferFacet = PantosTransferFacet(
+        newTransferFacet = VisionTransferFacet(
             getContractAddress(Contract.TRANSFER_FACET, true)
         );
-        newPantosForwarder = PantosForwarder(
+        newVisionForwarder = VisionForwarder(
             payable(getContractAddress(Contract.FORWARDER, true))
         );
 
         // Old items
-        pantosToken = PantosToken(getContractAddress(Contract.PAN, false));
+        visionToken = VisionToken(getContractAddress(Contract.VSN, false));
 
-        pantosHubProxy = PantosHubProxy(
+        visionHubProxy = VisionHubProxy(
             payable(getContractAddress(Contract.HUB_PROXY, false))
         );
         accessController = AccessController(
             getContractAddress(Contract.ACCESS_CONTROLLER, false)
         );
-        oldForwarder = PantosForwarder(
+        oldForwarder = VisionForwarder(
             getContractAddress(Contract.FORWARDER, false)
         );
         string[] memory tokenSymbols = getTokenSymbols();
         for (uint256 i = 0; i < tokenSymbols.length; i++) {
             Contract contract_ = _keysToContracts[tokenSymbols[i]];
             address token = getContractAddress(contract_, false);
-            tokens.push(PantosWrapper(token));
+            tokens.push(VisionWrapper(token));
         }
     }
 }

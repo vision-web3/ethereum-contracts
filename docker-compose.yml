@@ -1,23 +1,23 @@
 networks:
-  pantos-ethereum:
+  vision-ethereum:
     driver: overlay
-    name: pantos-ethereum-${STACK_IDENTIFIER}-${INSTANCE-1}
+    name: vision-ethereum-${STACK_IDENTIFIER}-${INSTANCE-1}
     attachable: true
 
 services:
   eth:
     restart: always
-    image: pantosio/ethereum-node:${DOCKER_TAG-local}
+    image: visionio/ethereum-node:${DOCKER_TAG-local}
     build:
       context: .
       dockerfile: Dockerfile
       target: blockchain-node
       x-bake:
         tags:
-          - ${DOCKER_REGISTRY-pantosio}/ethereum-node:${DOCKER_TAG-local}
-          - ${DOCKER_REGISTRY-pantosio}/ethereum-node:${EXTRA_TAG-local}
+          - ${DOCKER_REGISTRY-vision}/ethereum-node:${DOCKER_TAG-local}
+          - ${DOCKER_REGISTRY-vision}/ethereum-node:${EXTRA_TAG-local}
     networks:
-      pantos-ethereum:
+      vision-ethereum:
     ports:
       - 8545:8545
     environment:
@@ -25,11 +25,11 @@ services:
     volumes:
       # Workaround so that we can also access the data locally
       # Without needing an additional container
-    - type: volume
-      source: eth-data
-      target: /data
+      - type: volume
+        source: eth-data
+        target: /data
     healthcheck:
-      test: ["CMD-SHELL", "cast block-number"]
+      test: [ "CMD-SHELL", "cast block-number" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -56,29 +56,29 @@ services:
           target: /root/docker-compose.yml
   bnb:
     restart: always
-    image: pantosio/ethereum-node:${DOCKER_TAG-local}
+    image: vision/ethereum-node:${DOCKER_TAG-local}
     build:
       context: .
       dockerfile: Dockerfile
       target: blockchain-node
       x-bake:
         tags:
-          - ${DOCKER_REGISTRY-pantosio}/ethereum-node:${DOCKER_TAG-local}
-          - ${DOCKER_REGISTRY-pantosio}/ethereum-node:${EXTRA_TAG-local}
+          - ${DOCKER_REGISTRY-vision}/ethereum-node:${DOCKER_TAG-local}
+          - ${DOCKER_REGISTRY-vision}/ethereum-node:${EXTRA_TAG-local}
     networks:
-      pantos-ethereum:
+      vision-ethereum:
     ports:
       - 8546:8545
     volumes:
       # Workaround so that we can also access the data locally
       # Without needing an additional container
-    - type: volume
-      source: bnb-data
-      target: /data
+      - type: volume
+        source: bnb-data
+        target: /data
     environment:
       CHAIN: bnb_chain
     healthcheck:
-      test: ["CMD-SHELL", "cast block-number"]
+      test: [ "CMD-SHELL", "cast block-number" ]
       interval: 30s
       timeout: 10s
       retries: 5

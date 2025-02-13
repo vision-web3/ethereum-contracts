@@ -5,32 +5,32 @@ pragma solidity 0.8.26;
 import {console} from "forge-std/console.sol";
 
 import {AccessController} from "../../../src/access/AccessController.sol";
-import {IPantosHub} from "../../../src/interfaces/IPantosHub.sol";
+import {IVisionHub} from "../../../src/interfaces/IVisionHub.sol";
 
-import {PantosBaseAddresses} from "./../../helpers/PantosBaseAddresses.s.sol";
+import {VisionBaseAddresses} from "./../../helpers/VisionBaseAddresses.s.sol";
 import {SafeAddresses} from "./../../helpers/SafeAddresses.s.sol";
 
 /**
  * @title SetPrimaryValidatorNode
  *
- * @notice Set the primary validator node at the Pantos Hub.
+ * @notice Set the primary validator node at the Vision Hub.
  *
  * @dev Usage
  * forge script ./script/update/parameters/SetPrimaryValidatorNode.s.sol --rpc-url <rpc alias>
  *      --sig "roleActions(address)" <newPirmaryValidatorNode>
  */
-contract SetPrimaryValidatorNode is PantosBaseAddresses, SafeAddresses {
+contract SetPrimaryValidatorNode is VisionBaseAddresses, SafeAddresses {
     AccessController accessController;
-    IPantosHub public pantosHub;
+    IVisionHub public visionHub;
 
     function roleActions(address newPirmaryValidatorNode) public {
         readContractAddresses(determineBlockchain());
         accessController = AccessController(
             getContractAddress(Contract.ACCESS_CONTROLLER, false)
         );
-        pantosHub = IPantosHub(getContractAddress(Contract.HUB_PROXY, false));
+        visionHub = IVisionHub(getContractAddress(Contract.HUB_PROXY, false));
 
-        address oldPrimaryValidatorNode = pantosHub.getPrimaryValidatorNode();
+        address oldPrimaryValidatorNode = visionHub.getPrimaryValidatorNode();
         if (oldPrimaryValidatorNode == newPirmaryValidatorNode) {
             console.log(
                 "Primary validator node is already set to %s",
@@ -40,18 +40,18 @@ contract SetPrimaryValidatorNode is PantosBaseAddresses, SafeAddresses {
         }
 
         vm.broadcast(accessController.pauser());
-        pantosHub.pause();
-        console.log("Pantos hub paused: %s", pantosHub.paused());
+        visionHub.pause();
+        console.log("Vision hub paused: %s", visionHub.paused());
 
         vm.startBroadcast(accessController.superCriticalOps());
-        pantosHub.setPrimaryValidatorNode(newPirmaryValidatorNode);
-        pantosHub.unpause();
+        visionHub.setPrimaryValidatorNode(newPirmaryValidatorNode);
+        visionHub.unpause();
         console.log(
             "Primary validator node set to %s, old value was %s",
             newPirmaryValidatorNode,
             oldPrimaryValidatorNode
         );
-        console.log("Pantos hub paused: %s", pantosHub.paused());
+        console.log("Vision hub paused: %s", visionHub.paused());
         vm.stopBroadcast();
 
         writeAllSafeInfo(accessController);

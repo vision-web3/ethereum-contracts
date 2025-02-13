@@ -1,6 +1,6 @@
 # Testing Foundry Scripts with Role Signatures
 
-This guide explains the steps to test Foundry scripts that require role-based signatures for execution. The tests are designed to run against a Docker environment with predeployed Pantos contracts on Ethereum nodes.
+This guide explains the steps to test Foundry scripts that require role-based signatures for execution. The tests are designed to run against a Docker environment with predeployed Vision contracts on Ethereum nodes.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ Ensure you have Docker and Foundry installed on your machine.
 
 ### Start the Docker Stack
 
-The testing environment requires Ethereum nodes running inside Docker containers. These containers are configured to have the Pantos contracts predeployed. 
+The testing environment requires Ethereum nodes running inside Docker containers. These containers are configured to have the Vision contracts predeployed. 
 
 To start the stack, run the following command:
 

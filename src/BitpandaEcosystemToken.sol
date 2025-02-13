@@ -7,20 +7,20 @@ import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import {ERC20Pausable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 
-import {PantosRBAC} from "./access/PantosRBAC.sol";
-import {PantosRoles} from "./access/PantosRoles.sol";
+import {VisionRBAC} from "./access/VisionRBAC.sol";
+import {VisionRoles} from "./access/VisionRoles.sol";
 import {AccessController} from "./access/AccessController.sol";
-import {PantosBaseToken} from "./PantosBaseToken.sol";
+import {VisionBaseToken} from "./VisionBaseToken.sol";
 
 /**
- * @title Pantos-compatible variant of the Bitpanda Ecosystem Token
+ * @title Vision-compatible variant of the Bitpanda Ecosystem Token
  */
 contract BitpandaEcosystemToken is
-    PantosBaseToken,
+    VisionBaseToken,
     ERC20Burnable,
     ERC20Capped,
     ERC20Pausable,
-    PantosRBAC
+    VisionRBAC
 {
     string private constant _NAME = "Bitpanda Ecosystem Token";
 
@@ -38,14 +38,14 @@ contract BitpandaEcosystemToken is
         uint256 initialSupply,
         address accessControllerAddress
     )
-        PantosBaseToken(
+        VisionBaseToken(
             _NAME,
             _SYMBOL,
             _DECIMALS,
             AccessController(accessControllerAddress).superCriticalOps()
         )
         ERC20Capped(_MAX_SUPPLY)
-        PantosRBAC(accessControllerAddress)
+        VisionRBAC(accessControllerAddress)
     {
         require(
             initialSupply <= _MAX_SUPPLY,
@@ -57,12 +57,12 @@ contract BitpandaEcosystemToken is
     }
 
     /**
-     * @dev See {PantosBaseToken-onlyPantosForwarder}
+     * @dev See {VisionBaseToken-onlyVisionForwarder}
      */
-    modifier onlyPantosForwarder() override {
+    modifier onlyVisionForwarder() override {
         require(
-            msg.sender == getPantosForwarder(),
-            "BitpandaEcosystemToken: caller is not the PantosForwarder"
+            msg.sender == getVisionForwarder(),
+            "BitpandaEcosystemToken: caller is not the VisionForwarder"
         );
         _;
     }
@@ -70,7 +70,7 @@ contract BitpandaEcosystemToken is
     /**
      * @dev See {Pausable-_pause)
      */
-    function pause() external whenNotPaused onlyRole(PantosRoles.PAUSER) {
+    function pause() external whenNotPaused onlyRole(VisionRoles.PAUSER) {
         _pause();
     }
 
@@ -80,58 +80,58 @@ contract BitpandaEcosystemToken is
     function unpause()
         external
         whenPaused
-        onlyRole(PantosRoles.SUPER_CRITICAL_OPS)
+        onlyRole(VisionRoles.SUPER_CRITICAL_OPS)
     {
         require(
-            getPantosForwarder() != address(0),
-            "BitpandaEcosystemToken: PantosForwarder has not been set"
+            getVisionForwarder() != address(0),
+            "BitpandaEcosystemToken: VisionForwarder has not been set"
         );
         _unpause();
     }
 
     /**
-     * @dev See {PantosBaseToken-_setPantosForwarder}
+     * @dev See {VisionBaseToken-_setVisionForwarder}
      */
-    function setPantosForwarder(
-        address pantosForwarder
+    function setVisionForwarder(
+        address visionForwarder
     ) external whenPaused onlyOwner {
-        _setPantosForwarder(pantosForwarder);
+        _setVisionForwarder(visionForwarder);
     }
 
     /**
-     * @dev See {PantosBaseToken-decimals} and {ERC20-decimals}
+     * @dev See {VisionBaseToken-decimals} and {ERC20-decimals}
      */
     function decimals()
         public
         view
-        override(PantosBaseToken, ERC20)
+        override(VisionBaseToken, ERC20)
         returns (uint8)
     {
-        return PantosBaseToken.decimals();
+        return VisionBaseToken.decimals();
     }
 
     /**
-     * @dev See {PantosBaseToken-symbol} and {ERC20-symbol}
+     * @dev See {VisionBaseToken-symbol} and {ERC20-symbol}
      */
     function symbol()
         public
         view
-        override(PantosBaseToken, ERC20)
+        override(VisionBaseToken, ERC20)
         returns (string memory)
     {
-        return PantosBaseToken.symbol();
+        return VisionBaseToken.symbol();
     }
 
     /**
-     * @dev See {PantosBaseToken-name} and {ERC20-name}
+     * @dev See {VisionBaseToken-name} and {ERC20-name}
      */
     function name()
         public
         view
-        override(PantosBaseToken, ERC20)
+        override(VisionBaseToken, ERC20)
         returns (string memory)
     {
-        return PantosBaseToken.name();
+        return VisionBaseToken.name();
     }
 
     /**

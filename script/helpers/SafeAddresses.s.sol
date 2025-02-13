@@ -2,14 +2,14 @@
 pragma solidity 0.8.26;
 pragma abicoder v2;
 
-import {PantosRoles} from "../../src/access/PantosRoles.sol";
+import {VisionRoles} from "../../src/access/VisionRoles.sol";
 import {AccessController} from "../../src/access/AccessController.sol";
 
 import {Script} from "forge-std/Script.sol";
 import {Safe} from "@safe/Safe.sol";
-import {PantosBaseScript} from "./PantosBaseScript.s.sol";
+import {VisionBaseScript} from "./VisionBaseScript.s.sol";
 
-contract SafeAddresses is PantosBaseScript {
+contract SafeAddresses is VisionBaseScript {
     enum Role {
         PAUSER,
         DEPLOYER,
@@ -72,7 +72,7 @@ contract SafeAddresses is PantosBaseScript {
         }
     }
 
-    function exportPantosRolesAddresses(
+    function exportVisionRolesAddresses(
         address pauser,
         address deployer,
         address mediumCriticalOps,

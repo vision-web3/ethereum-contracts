@@ -4,12 +4,12 @@ pragma solidity 0.8.26;
 
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
-import {PantosRoles} from "./PantosRoles.sol";
+import {VisionRoles} from "./VisionRoles.sol";
 
 /**
  * @title Access controller
  *
- * @notice Access control contract to manage Pantos roles and permissions.
+ * @notice Access control contract to manage Vision roles and permissions.
  */
 contract AccessController is AccessControl {
     address public immutable pauser;
@@ -52,9 +52,9 @@ contract AccessController is AccessControl {
         mediumCriticalOps = mediumCriticalOps_;
         superCriticalOps = superCriticalOps_;
 
-        _grantRole(PantosRoles.PAUSER, pauser);
-        _grantRole(PantosRoles.DEPLOYER, deployer);
-        _grantRole(PantosRoles.MEDIUM_CRITICAL_OPS, mediumCriticalOps);
-        _grantRole(PantosRoles.SUPER_CRITICAL_OPS, superCriticalOps);
+        _grantRole(VisionRoles.PAUSER, pauser);
+        _grantRole(VisionRoles.DEPLOYER, deployer);
+        _grantRole(VisionRoles.MEDIUM_CRITICAL_OPS, mediumCriticalOps);
+        _grantRole(VisionRoles.SUPER_CRITICAL_OPS, superCriticalOps);
     }
 }

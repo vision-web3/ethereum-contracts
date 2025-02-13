@@ -1,19 +1,19 @@
-# Pantos scripts documentation
+# Vision scripts documentation
 
-One can use the Pantos scripts in the following cases:
+One can use the Vision scripts in the following cases:
 
 1. To do a deployment from scratch and initialize the system.
     1. To do a deployment from scratch, use the ```DeployContracts.s.sol``` script.
     2. To register the external tokens, use the ```RegisterExternalTokens.s.sol``` script.
-2. To redeploy a contract which is part of the Pantos system.
-    1. PantosHub redeployment: If the PantosHub has changes, it is important to understand if those changes lead to storage collision (https://docs.openzeppelin.com/upgrades-plugins/1.x/proxies#storage-collisions-between-implementation-versions).
-        1. If the PantosHub suffers storage collision, use the ```redeploy/RedeployHub.s.sol``` script.
-        2. If the PantosHub did not suffer storage collision, use the ```redeploy/UpgradeHub.s.sol``` script.
-    2. PantosForwarder redeployment. Use the ```redepoy/PantosForwarder.s.sol``` script.
-    3. PantosHub and PantosForwarder redeployment (at the same time).
-        1. If the PantosHub suffers storage collision, use the ```redeploy/RedeployHubAndForwarder.s.sol``` script.
-        2. If the PantosHub did not suffer storage collision, use the ```redeploy/UpgradeHubAndRedeployForwarder.s.sol``` script.
-3. To update various parameters of the Pantos system.
+2. To redeploy a contract which is part of the Vision system.
+    1. VisionHub redeployment: If the VisionHub has changes, it is important to understand if those changes lead to storage collision (https://docs.openzeppelin.com/upgrades-plugins/1.x/proxies#storage-collisions-between-implementation-versions).
+        1. If the VisionHub suffers storage collision, use the ```redeploy/RedeployHub.s.sol``` script.
+        2. If the VisionHub did not suffer storage collision, use the ```redeploy/UpgradeHub.s.sol``` script.
+    2. VisionForwarder redeployment. Use the ```redepoy/VisionForwarder.s.sol``` script.
+    3. VisionHub and VisionForwarder redeployment (at the same time).
+        1. If the VisionHub suffers storage collision, use the ```redeploy/RedeployHubAndForwarder.s.sol``` script.
+        2. If the VisionHub did not suffer storage collision, use the ```redeploy/UpgradeHubAndRedeployForwarder.s.sol``` script.
+3. To update various parameters of the Vision system.
     1. To update the fee factors, use the ```UpdateFeeFactors.s.sol``` script.
     2. To update the minimum deposit of the service nodes, use the ```UpdateMinimumDeposit.s.sol``` script.
     3. To update the parameter update delay, use the ```UpdateParameterUpdateDelay.s.sol``` script.

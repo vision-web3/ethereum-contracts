@@ -7,24 +7,24 @@ import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 
 import {AccessController} from "../../src/access/AccessController.sol";
-import {PantosToken} from "../../src/PantosToken.sol";
+import {VisionToken} from "../../src/VisionToken.sol";
 
-import {PantosBaseAddresses} from "./../helpers/PantosBaseAddresses.s.sol";
+import {VisionBaseAddresses} from "./../helpers/VisionBaseAddresses.s.sol";
 import {SafeAddresses} from "./../helpers/SafeAddresses.s.sol";
 
 /**
  * @title Send tokens
  *
- * @notice Send tokens owned by the Gnosis Safe (Pantos role).
+ * @notice Send tokens owned by the Gnosis Safe (Vision role).
  *
  * @dev Usage
  * forge script ./script/update/parameters/SendTokens.s.sol --rpc-url <rpc alias>
  *      --sig "roleActions(string,address,address,uint256)" <roleName> \
  *      <tokenAddress> <receiver> <amount>
  */
-contract SendTokens is PantosBaseAddresses, SafeAddresses {
+contract SendTokens is VisionBaseAddresses, SafeAddresses {
     AccessController accessController;
-    PantosToken pantosToken;
+    VisionToken visionToken;
     IERC20 token;
 
     address roleAddress;

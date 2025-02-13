@@ -8,7 +8,7 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {Safe} from "@safe/Safe.sol";
 import {Enum} from "@safe/libraries/Enum.sol";
 
-import {PantosBaseScript} from "./helpers/PantosBaseScript.s.sol";
+import {VisionBaseScript} from "./helpers/VisionBaseScript.s.sol";
 
 using stdJson for string;
 
@@ -24,7 +24,7 @@ using stdJson for string;
  *     --sender <sender> --rpc-url <rpc alias> --sig "run()" -vvvv\
  *    --slow
  */
-contract SubmitSafeTxs is PantosBaseScript {
+contract SubmitSafeTxs is VisionBaseScript {
     // This needs to be in alphabetical order!
     struct SafeTxDetail {
         uint256 chainId;

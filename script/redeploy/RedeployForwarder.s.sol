@@ -4,31 +4,31 @@ pragma solidity 0.8.26;
 /* solhint-disable no-console*/
 
 import {AccessController} from "../../src/access/AccessController.sol";
-import {IPantosHub} from "../../src/interfaces/IPantosHub.sol";
-import {IPantosToken} from "../../src/interfaces/IPantosToken.sol";
-import {PantosToken} from "../../src/PantosToken.sol";
-import {PantosWrapper} from "../../src/PantosWrapper.sol";
+import {IVisionHub} from "../../src/interfaces/IVisionHub.sol";
+import {IVisionToken} from "../../src/interfaces/IVisionToken.sol";
+import {VisionToken} from "../../src/VisionToken.sol";
+import {VisionWrapper} from "../../src/VisionWrapper.sol";
 
-import {PantosForwarder} from "../../src/PantosForwarder.sol";
+import {VisionForwarder} from "../../src/VisionForwarder.sol";
 
-import {PantosBaseAddresses} from "../helpers/PantosBaseAddresses.s.sol";
-import {PantosForwarderRedeployer} from "../helpers/PantosForwarderRedeployer.s.sol";
+import {VisionBaseAddresses} from "../helpers/VisionBaseAddresses.s.sol";
+import {VisionForwarderRedeployer} from "../helpers/VisionForwarderRedeployer.s.sol";
 import {SafeAddresses} from "../helpers/SafeAddresses.s.sol";
 
 /**
  * @title RedeployForwarder
  *
- * @notice Redeploy the Pantos Forwarder
- * To ensure correct functionality of the newly deployed Pantos Forwarder
- * within the Pantos protocol, the following steps are incorporated into
+ * @notice Redeploy the Vision Forwarder
+ * To ensure correct functionality of the newly deployed Vision Forwarder
+ * within the Vision protocol, the following steps are incorporated into
  * this script:
  *
- * 1. Retrieve the validator node addresses from the previous Pantos
- * Forwarder and configure it in the new Pantos Forwarder.
- * 2. Retrieve the Pantos token address from the Pantos Hub and
- * configure it in the new Pantos Forwarder.
- * 3. Configure the new Pantos Forwarder at the Pantos Hub.
- * 4. Configure the new Pantos Forwarder at Pantos, Best and Wrapper tokens.
+ * 1. Retrieve the validator node addresses from the previous Vision
+ * Forwarder and configure it in the new Vision Forwarder.
+ * 2. Retrieve the Vision token address from the Vision Hub and
+ * configure it in the new Vision Forwarder.
+ * 3. Configure the new Vision Forwarder at the Vision Hub.
+ * 4. Configure the new Vision Forwarder at Vision, Best and Wrapper tokens.
  *
  * @dev Usage
  * 1. Deploy by any gas paying account:
@@ -40,19 +40,19 @@ import {SafeAddresses} from "../helpers/SafeAddresses.s.sol";
  *     --rpc-url <rpc alias> --sig "roleActions() -vvvv"
  */
 contract RedeployForwarder is
-    PantosBaseAddresses,
+    VisionBaseAddresses,
     SafeAddresses,
-    PantosForwarderRedeployer
+    VisionForwarderRedeployer
 {
     AccessController accessController;
-    PantosForwarder newPantosForwarder;
-    IPantosHub pantosHub;
-    PantosWrapper[] tokens;
+    VisionForwarder newVisionForwarder;
+    IVisionHub visionHub;
+    VisionWrapper[] tokens;
 
     function deploy(address accessControllerAddress) public {
         accessController = AccessController(accessControllerAddress);
         vm.startBroadcast();
-        newPantosForwarder = deployPantosForwarder(accessController);
+        newVisionForwarder = deployVisionForwarder(accessController);
         vm.stopBroadcast();
 
         exportRedeployedContractAddresses();
@@ -60,8 +60,8 @@ contract RedeployForwarder is
 
     function roleActions() public {
         importContractAddresses();
-        PantosForwarder oldForwarder = PantosForwarder(
-            pantosHub.getPantosForwarder()
+        VisionForwarder oldForwarder = VisionForwarder(
+            visionHub.getVisionForwarder()
         );
 
         uint256 minimumValidatorNodeSignatures = tryGetMinimumValidatorNodeSignatures(
@@ -72,23 +72,23 @@ contract RedeployForwarder is
         );
 
         vm.startBroadcast(accessController.superCriticalOps());
-        initializePantosForwarder(
-            newPantosForwarder,
-            pantosHub,
-            PantosToken(pantosHub.getPantosToken()),
+        initializeVisionForwarder(
+            newVisionForwarder,
+            visionHub,
+            VisionToken(visionHub.getVisionToken()),
             minimumValidatorNodeSignatures,
             validatorNodeAddresses
         );
         vm.stopBroadcast();
 
-        // Pause pantos Hub and old forwarder
+        // Pause vision Hub and old forwarder
         vm.startBroadcast(accessController.pauser());
         pauseForwarder(oldForwarder);
-        pantosHub.pause();
+        visionHub.pause();
         vm.stopBroadcast();
 
         vm.startBroadcast(accessController.superCriticalOps());
-        migrateForwarderAtHub(newPantosForwarder, pantosHub);
+        migrateForwarderAtHub(newVisionForwarder, visionHub);
         vm.stopBroadcast();
 
         // migrate new Forwarder at tokens
@@ -97,7 +97,7 @@ contract RedeployForwarder is
             tokens[i].pause();
 
             vm.startBroadcast(accessController.superCriticalOps());
-            migrateNewForwarderAtToken(newPantosForwarder, tokens[i]);
+            migrateNewForwarderAtToken(newVisionForwarder, tokens[i]);
             vm.stopBroadcast();
         }
         // update json with new forwarder
@@ -109,7 +109,7 @@ contract RedeployForwarder is
         ContractAddress[] memory contractAddresses = new ContractAddress[](1);
         contractAddresses[0] = ContractAddress(
             Contract.FORWARDER,
-            address(newPantosForwarder)
+            address(newVisionForwarder)
         );
         exportContractAddresses(contractAddresses, true);
     }
@@ -119,7 +119,7 @@ contract RedeployForwarder is
         readRedeployedContractAddresses();
 
         // New items
-        newPantosForwarder = PantosForwarder(
+        newVisionForwarder = VisionForwarder(
             payable(getContractAddress(Contract.FORWARDER, true))
         );
 
@@ -128,7 +128,7 @@ contract RedeployForwarder is
             getContractAddress(Contract.ACCESS_CONTROLLER, false)
         );
 
-        pantosHub = IPantosHub(
+        visionHub = IVisionHub(
             payable(getContractAddress(Contract.HUB_PROXY, false))
         );
 
@@ -136,7 +136,7 @@ contract RedeployForwarder is
         for (uint256 i = 0; i < tokenSymbols.length; i++) {
             Contract contract_ = _keysToContracts[tokenSymbols[i]];
             address token = getContractAddress(contract_, false);
-            tokens.push(PantosWrapper(token));
+            tokens.push(VisionWrapper(token));
         }
     }
 }

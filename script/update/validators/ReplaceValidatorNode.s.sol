@@ -5,23 +5,23 @@ pragma solidity 0.8.26;
 import {console} from "forge-std/console.sol";
 
 import {AccessController} from "../../../src/access/AccessController.sol";
-import {PantosForwarder} from "../../../src/PantosForwarder.sol";
+import {VisionForwarder} from "../../../src/VisionForwarder.sol";
 
-import {PantosBaseAddresses} from "./../../helpers/PantosBaseAddresses.s.sol";
+import {VisionBaseAddresses} from "./../../helpers/VisionBaseAddresses.s.sol";
 import {SafeAddresses} from "./../../helpers/SafeAddresses.s.sol";
 
 /**
  * @title ReplaceValidatorNode
  *
- * @notice Replace a validator node at the Pantos Forwarder.
+ * @notice Replace a validator node at the Vision Forwarder.
  *
  * @dev Usage
  * forge script ./script/update/validators/ReplaceValidatorNode.s.sol --rpc-url <rpc alias>
  *      --sig "roleActions(address,address)" <oldValidatorNode> <newValidatorNode>
  */
-contract ReplaceValidatorNode is PantosBaseAddresses, SafeAddresses {
+contract ReplaceValidatorNode is VisionBaseAddresses, SafeAddresses {
     AccessController accessController;
-    PantosForwarder public pantosForwarder;
+    VisionForwarder public visionForwarder;
 
     function roleActions(
         address oldValidatorNode,
@@ -31,11 +31,11 @@ contract ReplaceValidatorNode is PantosBaseAddresses, SafeAddresses {
         accessController = AccessController(
             getContractAddress(Contract.ACCESS_CONTROLLER, false)
         );
-        pantosForwarder = PantosForwarder(
+        visionForwarder = VisionForwarder(
             getContractAddress(Contract.FORWARDER, false)
         );
 
-        address[] memory validatorNodes = pantosForwarder.getValidatorNodes();
+        address[] memory validatorNodes = visionForwarder.getValidatorNodes();
         bool found = false;
         for (uint256 i = 0; i < validatorNodes.length; i++) {
             require(
@@ -52,16 +52,16 @@ contract ReplaceValidatorNode is PantosBaseAddresses, SafeAddresses {
             revert("Validator node not found");
         }
         vm.broadcast(accessController.pauser());
-        pantosForwarder.pause();
-        console.log("Pantos forwarder paused: %s", pantosForwarder.paused());
+        visionForwarder.pause();
+        console.log("Vision forwarder paused: %s", visionForwarder.paused());
 
         vm.startBroadcast(accessController.superCriticalOps());
-        pantosForwarder.addValidatorNode(newValidatorNode);
-        pantosForwarder.removeValidatorNode(oldValidatorNode);
-        pantosForwarder.unpause();
+        visionForwarder.addValidatorNode(newValidatorNode);
+        visionForwarder.removeValidatorNode(oldValidatorNode);
+        visionForwarder.unpause();
         console.log("Validator node %s added", newValidatorNode);
         console.log("Old validator node %s removed", oldValidatorNode);
-        console.log("Pantos forwarder paused: %s", pantosForwarder.paused());
+        console.log("Vision forwarder paused: %s", visionForwarder.paused());
         vm.stopBroadcast();
 
         writeAllSafeInfo(accessController);

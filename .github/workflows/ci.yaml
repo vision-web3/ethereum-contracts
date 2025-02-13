@@ -155,11 +155,11 @@ jobs:
       matrix:
         arch: ['amd64']
     env:
-      PANTOS_ETHEREUM_CONTRACTS: ${{ github.workspace }}/ethereum-contracts
+      VISION_ETHEREUM_CONTRACTS: ${{ github.workspace }}/ethereum-contracts
     steps:
       - uses: actions/checkout@v4
         with:
-          path: ${{ env.PANTOS_ETHEREUM_CONTRACTS }}
+          path: ${{ env.VISION_ETHEREUM_CONTRACTS }}
             
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -169,7 +169,7 @@ jobs:
         id: buildx
 
       - name: Check docker config and disable live reload
-        working-directory: ${{ env.PANTOS_ETHEREUM_CONTRACTS }}
+        working-directory: ${{ env.VISION_ETHEREUM_CONTRACTS }}
         run: |
           FILE=/etc/docker/daemon.json
           if [[ -f "$FILE" ]]; then
@@ -180,14 +180,14 @@ jobs:
           make check-swarm-init
 
       - name: Build and load
-        working-directory: ${{ env.PANTOS_ETHEREUM_CONTRACTS }}
+        working-directory: ${{ env.VISION_ETHEREUM_CONTRACTS }}
         run: |
           make docker-build ARGS='--set "*.cache-from=type=gha" \
             --set "*.platform=linux/${{ matrix.arch }}" \
             --builder ${{ steps.buildx.outputs.name }} \
             --load'
 
-      - uses: pantos-io/e2e-testing/.github/actions/run-tests@main
+      - uses: vision-web3-foundation/e2e-testing/.github/actions/run-tests@main
         with:
-          ethereum-contracts-path: ${{ env.PANTOS_ETHEREUM_CONTRACTS }}
+          ethereum-contracts-path: ${{ env.VISION_ETHEREUM_CONTRACTS }}
           ethereum-contracts-version: 'local'

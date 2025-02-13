@@ -4,22 +4,22 @@ pragma solidity 0.8.26;
 /* solhint-disable no-console*/
 import {console} from "forge-std/console.sol";
 
-import {IPantosHub} from "../../src/interfaces/IPantosHub.sol";
-import {PantosHubProxy} from "../../src/PantosHubProxy.sol";
+import {IVisionHub} from "../../src/interfaces/IVisionHub.sol";
+import {VisionHubProxy} from "../../src/VisionHubProxy.sol";
 import {AccessController} from "../../src/access/AccessController.sol";
-import {PantosForwarder} from "../../src/PantosForwarder.sol";
-import {PantosToken} from "../../src/PantosToken.sol";
+import {VisionForwarder} from "../../src/VisionForwarder.sol";
+import {VisionToken} from "../../src/VisionToken.sol";
 
-import {PantosHubDeployer} from "../helpers/PantosHubDeployer.s.sol";
-import {PantosBaseAddresses} from "../helpers/PantosBaseAddresses.s.sol";
-import {PantosRegistryFacet} from "../../src/facets/PantosRegistryFacet.sol";
-import {PantosTransferFacet} from "../../src/facets/PantosTransferFacet.sol";
+import {VisionHubDeployer} from "../helpers/VisionHubDeployer.s.sol";
+import {VisionBaseAddresses} from "../helpers/VisionBaseAddresses.s.sol";
+import {VisionRegistryFacet} from "../../src/facets/VisionRegistryFacet.sol";
+import {VisionTransferFacet} from "../../src/facets/VisionTransferFacet.sol";
 import {SafeAddresses} from "../helpers/SafeAddresses.s.sol";
 
 /**
  * @title UpgradeHub
  *
- * @notice Deploy and upgrade facets of the Pantos Hub.
+ * @notice Deploy and upgrade facets of the Vision Hub.
  *
  * @dev Usage
  * 1. Deploy by any gas paying account:
@@ -30,14 +30,14 @@ import {SafeAddresses} from "../helpers/SafeAddresses.s.sol";
  * forge script ./script/redeploy/UpgradeHub.s.sol --rpc-url <rpc alias> \
  * -vvvv --sig "roleActions()"
  */
-contract UpgradeHub is PantosBaseAddresses, SafeAddresses, PantosHubDeployer {
-    PantosHubProxy pantosHubProxy;
-    PantosForwarder pantosForwarder;
-    PantosToken pantosToken;
+contract UpgradeHub is VisionBaseAddresses, SafeAddresses, VisionHubDeployer {
+    VisionHubProxy visionHubProxy;
+    VisionForwarder visionForwarder;
+    VisionToken visionToken;
     AccessController accessController;
 
-    PantosRegistryFacet newRegistryFacet;
-    PantosTransferFacet newTransferFacet;
+    VisionRegistryFacet newRegistryFacet;
+    VisionTransferFacet newTransferFacet;
 
     function deploy() public {
         vm.startBroadcast();
@@ -50,19 +50,19 @@ contract UpgradeHub is PantosBaseAddresses, SafeAddresses, PantosHubDeployer {
     // this will also read current addresses from <blockchainName>.json -- update it at end of the script
     function roleActions() public {
         importContractAddresses();
-        IPantosHub pantosHub = IPantosHub(address(pantosHubProxy));
-        console.log("PantosHub", address(pantosHub));
+        IVisionHub visionHub = IVisionHub(address(visionHubProxy));
+        console.log("VisionHub", address(visionHub));
 
-        uint256 commitmentWaitPeriod = pantosHub.getCommitmentWaitPeriod();
+        uint256 commitmentWaitPeriod = visionHub.getCommitmentWaitPeriod();
 
-        // Ensuring PantosHub is paused at the time of diamond cut
+        // Ensuring VisionHub is paused at the time of diamond cut
         vm.startBroadcast(accessController.pauser());
-        pausePantosHub(pantosHub);
+        pauseVisionHub(visionHub);
         vm.stopBroadcast();
 
         vm.startBroadcast(accessController.deployer());
         diamondCutUpgradeFacets(
-            address(pantosHubProxy),
+            address(visionHubProxy),
             newRegistryFacet,
             newTransferFacet
         );
@@ -70,11 +70,11 @@ contract UpgradeHub is PantosBaseAddresses, SafeAddresses, PantosHubDeployer {
 
         // this will do nothing if there is nothing new added to the storage slots
         vm.startBroadcast(accessController.superCriticalOps());
-        initializePantosHub(
-            pantosHub,
-            pantosForwarder,
-            pantosToken,
-            pantosHub.getPrimaryValidatorNode(),
+        initializeVisionHub(
+            visionHub,
+            visionForwarder,
+            visionToken,
+            visionHub.getPrimaryValidatorNode(),
             commitmentWaitPeriod
         );
         vm.stopBroadcast();
@@ -98,21 +98,21 @@ contract UpgradeHub is PantosBaseAddresses, SafeAddresses, PantosHubDeployer {
     function importContractAddresses() public {
         readContractAddresses(determineBlockchain());
         readRedeployedContractAddresses();
-        newRegistryFacet = PantosRegistryFacet(
+        newRegistryFacet = VisionRegistryFacet(
             getContractAddress(Contract.REGISTRY_FACET, true)
         );
-        newTransferFacet = PantosTransferFacet(
+        newTransferFacet = VisionTransferFacet(
             getContractAddress(Contract.TRANSFER_FACET, true)
         );
-        pantosHubProxy = PantosHubProxy(
+        visionHubProxy = VisionHubProxy(
             payable(getContractAddress(Contract.HUB_PROXY, false))
         );
         accessController = AccessController(
             getContractAddress(Contract.ACCESS_CONTROLLER, false)
         );
-        pantosForwarder = PantosForwarder(
+        visionForwarder = VisionForwarder(
             getContractAddress(Contract.FORWARDER, false)
         );
-        pantosToken = PantosToken(getContractAddress(Contract.PAN, false));
+        visionToken = VisionToken(getContractAddress(Contract.VSN, false));
     }
 }

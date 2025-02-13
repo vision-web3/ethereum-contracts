@@ -4,38 +4,38 @@ pragma solidity 0.8.26;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {PantosToken} from "../src/PantosToken.sol";
+import {VisionToken} from "../src/VisionToken.sol";
 import {AccessController} from "../src/access/AccessController.sol";
-import {PantosTokenMigrator} from "../src/PantosTokenMigrator.sol";
+import {VisionTokenMigrator} from "../src/VisionTokenMigrator.sol";
 
-import {PantosTokenMigratorDeployer} from "./helpers/PantosTokenMigratorDeployer.s.sol";
-import {PantosTokenDeployer} from "./helpers/PantosTokenDeployer.s.sol";
+import {VisionTokenMigratorDeployer} from "./helpers/VisionTokenMigratorDeployer.s.sol";
+import {VisionTokenDeployer} from "./helpers/VisionTokenDeployer.s.sol";
 import {AccessControllerDeployer} from "./helpers/AccessControllerDeployer.s.sol";
-import {PantosBaseAddresses} from "./helpers/PantosBaseAddresses.s.sol";
+import {VisionBaseAddresses} from "./helpers/VisionBaseAddresses.s.sol";
 import {SafeAddresses} from "./helpers/SafeAddresses.s.sol";
 
 /**
- * @title Deploy PAN migrator
+ * @title Deploy VSN migrator
  *
- * @notice Deploy the PAN migrator along with its dependencies:
- *     The PAN token and the Access Controller.
+ * @notice Deploy the VSN migrator along with its dependencies:
+ *     The VSN token and the Access Controller.
  *
  * @dev Usage
  * Deploy by any gas paying account:
- * forge script ./script/DeployPanMigrator.s.sol --account <account> \
+ * forge script ./script/DeployVsnMigrator.s.sol --account <account> \
  *     --sender <sender> --rpc-url <rpc alias> --slow --force --sig \
  *     "deploy(address)" <oldTokenAddress>
  */
-contract DeployPanMigrator is
-    PantosBaseAddresses,
+contract DeployVsnMigrator is
+    VisionBaseAddresses,
     SafeAddresses,
     AccessControllerDeployer,
-    PantosTokenDeployer,
-    PantosTokenMigratorDeployer
+    VisionTokenDeployer,
+    VisionTokenMigratorDeployer
 {
     AccessController accessController;
-    PantosToken pantosToken;
-    PantosTokenMigrator pantosTokenMigrator;
+    VisionToken visionToken;
+    VisionTokenMigrator visionTokenMigrator;
 
     function deploy(address oldTokenAddress) public {
         vm.startBroadcast();
@@ -50,13 +50,13 @@ contract DeployPanMigrator is
             mediumCriticalOps,
             superCriticalOps
         );
-        pantosToken = deployPantosToken(
+        visionToken = deployVisionToken(
             IERC20(oldTokenAddress).totalSupply(),
             accessController
         );
-        pantosTokenMigrator = deployPantosTokenMigrator(
+        visionTokenMigrator = deployVisionTokenMigrator(
             oldTokenAddress,
-            address(pantosToken)
+            address(visionToken)
         );
         vm.stopBroadcast();
 
@@ -70,12 +70,12 @@ contract DeployPanMigrator is
             address(accessController)
         );
         contractAddresses[1] = ContractAddress(
-            Contract.PAN,
-            address(pantosToken)
+            Contract.VSN,
+            address(visionToken)
         );
         contractAddresses[2] = ContractAddress(
-            Contract.PAN_MIGRATOR,
-            address(pantosTokenMigrator)
+            Contract.VSN_MIGRATOR,
+            address(visionTokenMigrator)
         );
         exportContractAddresses(contractAddresses, false);
     }
