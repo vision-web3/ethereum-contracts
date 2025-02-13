@@ -37,7 +37,7 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     permissions: 
-      contents: read;
+      contents: read
     steps:
       # - uses: step-security/harden-runner@v2
       #   if: ${{ github.event.repository.visibility == 'public' }}
