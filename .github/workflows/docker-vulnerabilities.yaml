@@ -11,6 +11,7 @@ jobs:
 
         steps:
             - uses: step-security/harden-runner@v2
+              if: ${{ github.event.repository.visibility == 'public' }}
               with:
                disable-sudo: false
                egress-policy: audit

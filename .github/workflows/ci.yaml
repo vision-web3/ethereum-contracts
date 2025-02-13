@@ -15,6 +15,7 @@ jobs:
       security-events: write
     steps:
       - uses: step-security/harden-runner@v2
+        if: ${{ github.event.repository.visibility == 'public' }}
         with:
           disable-sudo: true
           egress-policy: audit
@@ -36,6 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: step-security/harden-runner@v2
+        if: ${{ github.event.repository.visibility == 'public' }}
         with:
           disable-sudo: false
           egress-policy: audit
@@ -69,6 +71,7 @@ jobs:
         arch: ['amd64']
     steps:
       - uses: step-security/harden-runner@v2
+        if: ${{ github.event.repository.visibility == 'public' }}
         with:
           disable-sudo: false
           egress-policy: audit
@@ -124,6 +127,7 @@ jobs:
       security-events: write
     steps:
       - uses: step-security/harden-runner@v2
+        if: ${{ github.event.repository.visibility == 'public' }}
         with:
           disable-sudo: false
           egress-policy: audit
