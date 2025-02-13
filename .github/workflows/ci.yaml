@@ -14,11 +14,11 @@ jobs:
       # required for all workflows
       security-events: write
     steps:
-      - uses: step-security/harden-runner@v2
-        if: ${{ github.event.repository.visibility == 'public' }}
-        with:
-          disable-sudo: true
-          egress-policy: audit
+      # - uses: step-security/harden-runner@v2
+      #   if: ${{ github.event.repository.visibility == 'public' }}
+      #   with:
+      #     disable-sudo: true
+      #     egress-policy: audit
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -36,11 +36,11 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     steps:
-      - uses: step-security/harden-runner@v2
-        if: ${{ github.event.repository.visibility == 'public' }}
-        with:
-          disable-sudo: false
-          egress-policy: audit
+      # - uses: step-security/harden-runner@v2
+      #   if: ${{ github.event.repository.visibility == 'public' }}
+      #   with:
+      #     disable-sudo: false
+      #     egress-policy: audit
       - uses: actions/checkout@v4
         with:
           submodules: recursive
