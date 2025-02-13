@@ -11,6 +11,7 @@
     "surya": "0.4.12"
   },
   "dependencies": {
-    "forge": "^2.3.0"
+    "forge": "^2.3.0",
+    "package.json": "^2.0.1"
   }
 }
