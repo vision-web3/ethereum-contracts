@@ -89,6 +89,17 @@ abis-compact: build
 docs:
 	@forge doc
 
+.PHONY: abis-common
+abis-common:
+	@set -e; \
+	
+	for item in uno dos tres cuatro; do \
+		echo $(item); \
+	done; \
+	echo  "${arr[0]}"
+
+    # You can access them using echo "${arr[0]}", "${arr[1]}" also
+
 .PHONY: docs-abis
 docs-abis: abis docs docs-openzeppelin
 	@set -e; \
