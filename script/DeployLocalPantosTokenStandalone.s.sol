@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.26;
 
-import {PantosToken} from "../src/PantosToken.sol";
-import {PantosForwarder} from "../src/PantosForwarder.sol";
+import {VisionToken} from "../src/VisionToken.sol";
+import {VisionForwarder} from "../src/VisionForwarder.sol";
 import {AccessController} from "../src/access/AccessController.sol";
 
-import {PantosTokenDeployer} from "./helpers/PantosTokenDeployer.s.sol";
+import {VisionTokenDeployer} from "./helpers/VisionTokenDeployer.s.sol";
 import {Constants} from "./helpers/Constants.s.sol";
 import {SafeAddresses} from "./helpers/SafeAddresses.s.sol";
 
-contract DeployLocalPantosTokenStandalone is
-    PantosTokenDeployer,
+contract DeployLocalVisionTokenStandalone is
+    VisionTokenDeployer,
     SafeAddresses
 {
     function deploy(address accessControllerAddress) public {
         vm.startBroadcast();
-        deployPantosToken(
-            Constants.INITIAL_SUPPLY_PAN,
+        deployVisionToken(
+            Constants.INITIAL_SUPPLY_VSN,
             AccessController(accessControllerAddress)
         );
         vm.stopBroadcast();
@@ -24,19 +24,19 @@ contract DeployLocalPantosTokenStandalone is
 
     function roleActions(
         address accessControllerAddress,
-        address pantosTokenAddress,
-        address pantosForwarderAddress
+        address visionTokenAddress,
+        address visionForwarderAddress
     ) external {
         AccessController accessController = AccessController(
             accessControllerAddress
         );
-        PantosForwarder pantosForwarder = PantosForwarder(
-            pantosForwarderAddress
+        VisionForwarder visionForwarder = VisionForwarder(
+            visionForwarderAddress
         );
-        PantosToken pantosToken = PantosToken(pantosTokenAddress);
+        VisionToken visionToken = VisionToken(visionTokenAddress);
 
         vm.startBroadcast(accessController.superCriticalOps());
-        initializePantosToken(pantosToken, pantosForwarder);
+        initializeVisionToken(visionToken, visionForwarder);
         vm.stopBroadcast();
         writeAllSafeInfo(accessController);
     }

@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 import {Script} from "forge-std/Script.sol";
 
-import {PantosTypes} from "../../../src/interfaces/PantosTypes.sol";
+import {VisionTypes} from "../../../src/interfaces/VisionTypes.sol";
 
 contract UpdateBase is Script {
     enum UpdateState {
@@ -12,7 +12,7 @@ contract UpdateBase is Script {
     }
 
     function isInitiateOrExecute(
-        PantosTypes.UpdatableUint256 memory updatableUint256,
+        VisionTypes.UpdatableUint256 memory updatableUint256,
         uint256 newValue
     ) internal returns (UpdateState) {
         uint256 currentTime = vm.unixTime() / 1000;

@@ -5,15 +5,15 @@ pragma solidity 0.8.26;
 import {console2} from "forge-std/console2.sol";
 
 import {AccessController} from "../src/access/AccessController.sol";
-import {PantosTypes} from "../src/interfaces/PantosTypes.sol";
-import {IPantosHub} from "../src/interfaces/IPantosHub.sol";
-import {PantosBaseAddresses} from "./helpers/PantosBaseAddresses.s.sol";
+import {VisionTypes} from "../src/interfaces/VisionTypes.sol";
+import {IVisionHub} from "../src/interfaces/IVisionHub.sol";
+import {VisionBaseAddresses} from "./helpers/VisionBaseAddresses.s.sol";
 import {SafeAddresses} from "./helpers/SafeAddresses.s.sol";
 
 /**
  * @title RegisterExternalTokens
  *
- * @notice Register newly deployed external tokens at the Pantos hub of an
+ * @notice Register newly deployed external tokens at the Vision hub of an
  * Ethereum-compatible blockchain.
  *
  * @dev Usage
@@ -23,9 +23,9 @@ import {SafeAddresses} from "./helpers/SafeAddresses.s.sol";
  * This scripts expect all the address json files to be available at project
  * root dir.
  */
-contract RegisterExternalTokens is PantosBaseAddresses, SafeAddresses {
+contract RegisterExternalTokens is VisionBaseAddresses, SafeAddresses {
     AccessController accessController;
-    IPantosHub public pantosHubProxy;
+    IVisionHub public visionHubProxy;
 
     function registerExternalToken(Blockchain memory otherBlockchain) private {
         string[] memory tokenSymbols = getTokenSymbols();
@@ -37,15 +37,15 @@ contract RegisterExternalTokens is PantosBaseAddresses, SafeAddresses {
                 otherBlockchain.blockchainId
             );
 
-            PantosTypes.ExternalTokenRecord
-                memory externalTokenRecord = pantosHubProxy
+            VisionTypes.ExternalTokenRecord
+                memory externalTokenRecord = visionHubProxy
                     .getExternalTokenRecord(
                         token,
                         uint256(otherBlockchain.blockchainId)
                     );
 
             if (!externalTokenRecord.active) {
-                pantosHubProxy.registerExternalToken(
+                visionHubProxy.registerExternalToken(
                     token,
                     uint256(otherBlockchain.blockchainId),
                     externalToken
@@ -70,23 +70,23 @@ contract RegisterExternalTokens is PantosBaseAddresses, SafeAddresses {
                         externalTokenRecord.externalToken
                     );
 
-                    pantosHubProxy.unregisterExternalToken(
+                    visionHubProxy.unregisterExternalToken(
                         token,
                         uint256(otherBlockchain.blockchainId)
                     );
                     console2.log(
-                        "PantosHub.unregisterExternalToken(%s, %s)",
+                        "VisionHub.unregisterExternalToken(%s, %s)",
                         token,
                         uint256(otherBlockchain.blockchainId)
                     );
 
-                    pantosHubProxy.registerExternalToken(
+                    visionHubProxy.registerExternalToken(
                         token,
                         uint256(otherBlockchain.blockchainId),
                         externalToken
                     );
                     console2.log(
-                        "PantosHub.registerExternalToken(%s, %s, %s)",
+                        "VisionHub.registerExternalToken(%s, %s, %s)",
                         token,
                         uint256(otherBlockchain.blockchainId),
                         externalToken
@@ -123,7 +123,7 @@ contract RegisterExternalTokens is PantosBaseAddresses, SafeAddresses {
     function roleActions() public {
         readContractAddressesAllChains();
 
-        pantosHubProxy = IPantosHub(
+        visionHubProxy = IVisionHub(
             getContractAddress(Contract.HUB_PROXY, false)
         );
         accessController = AccessController(

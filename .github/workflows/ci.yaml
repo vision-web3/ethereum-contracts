@@ -13,11 +13,13 @@ jobs:
     permissions:
       # required for all workflows
       security-events: write
+      contents: read
     steps:
-      - uses: step-security/harden-runner@v2
-        with:
-          disable-sudo: true
-          egress-policy: audit
+      # - uses: step-security/harden-runner@v2
+      #   if: ${{ github.event.repository.visibility == 'public' }}
+      #   with:
+      #     disable-sudo: true
+      #     egress-policy: audit
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -34,11 +36,14 @@ jobs:
   build-test:
     name: Build and test
     runs-on: ubuntu-latest
+    permissions: 
+      contents: read
     steps:
-      - uses: step-security/harden-runner@v2
-        with:
-          disable-sudo: false
-          egress-policy: audit
+      # - uses: step-security/harden-runner@v2
+      #   if: ${{ github.event.repository.visibility == 'public' }}
+      #   with:
+      #     disable-sudo: false
+      #     egress-policy: audit
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -69,6 +74,7 @@ jobs:
         arch: ['amd64']
     steps:
       - uses: step-security/harden-runner@v2
+        if: ${{ github.event.repository.visibility == 'public' }}
         with:
           disable-sudo: false
           egress-policy: audit
@@ -124,6 +130,7 @@ jobs:
       security-events: write
     steps:
       - uses: step-security/harden-runner@v2
+        if: ${{ github.event.repository.visibility == 'public' }}
         with:
           disable-sudo: false
           egress-policy: audit
@@ -155,11 +162,11 @@ jobs:
       matrix:
         arch: ['amd64']
     env:
-      PANTOS_ETHEREUM_CONTRACTS: ${{ github.workspace }}/ethereum-contracts
+      VISION_ETHEREUM_CONTRACTS: ${{ github.workspace }}/ethereum-contracts
     steps:
       - uses: actions/checkout@v4
         with:
-          path: ${{ env.PANTOS_ETHEREUM_CONTRACTS }}
+          path: ${{ env.VISION_ETHEREUM_CONTRACTS }}
             
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -169,7 +176,7 @@ jobs:
         id: buildx
 
       - name: Check docker config and disable live reload
-        working-directory: ${{ env.PANTOS_ETHEREUM_CONTRACTS }}
+        working-directory: ${{ env.VISION_ETHEREUM_CONTRACTS }}
         run: |
           FILE=/etc/docker/daemon.json
           if [[ -f "$FILE" ]]; then
@@ -180,14 +187,14 @@ jobs:
           make check-swarm-init
 
       - name: Build and load
-        working-directory: ${{ env.PANTOS_ETHEREUM_CONTRACTS }}
+        working-directory: ${{ env.VISION_ETHEREUM_CONTRACTS }}
         run: |
           make docker-build ARGS='--set "*.cache-from=type=gha" \
             --set "*.platform=linux/${{ matrix.arch }}" \
             --builder ${{ steps.buildx.outputs.name }} \
             --load'
 
-      - uses: pantos-io/e2e-testing/.github/actions/run-tests@main
+      - uses: vision-web3-foundation/e2e-testing/.github/actions/run-tests@main
         with:
-          ethereum-contracts-path: ${{ env.PANTOS_ETHEREUM_CONTRACTS }}
+          ethereum-contracts-path: ${{ env.VISION_ETHEREUM_CONTRACTS }}
           ethereum-contracts-version: 'local'

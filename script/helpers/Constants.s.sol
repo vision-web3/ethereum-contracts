@@ -10,8 +10,8 @@ library Constants {
 
     uint256 public constant MINIMUM_SERVICE_NODE_DEPOSIT = 10 ** 5 * 10 ** 8;
 
-    // PantosToken
-    uint256 public constant INITIAL_SUPPLY_PAN = (10 ** 9) * (10 ** 8);
+    // VisionToken
+    uint256 public constant INITIAL_SUPPLY_VSN = (10 ** 9) * (10 ** 8);
 
     // BitpandaEcosystemToken
     uint256 public constant INITIAL_SUPPLY_BEST = (10 ** 9) * (10 ** 8);

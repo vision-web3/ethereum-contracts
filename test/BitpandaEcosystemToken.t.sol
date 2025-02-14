@@ -4,13 +4,13 @@ pragma solidity 0.8.26;
 
 import {console2} from "forge-std/console2.sol";
 
-import {IPantosToken} from "../src/interfaces/IPantosToken.sol";
-import {PantosBaseToken} from "../src/PantosBaseToken.sol";
+import {IVisionToken} from "../src/interfaces/IVisionToken.sol";
+import {VisionBaseToken} from "../src/VisionBaseToken.sol";
 import {BitpandaEcosystemToken} from "../src/BitpandaEcosystemToken.sol";
 
-import {PantosBaseTokenTest} from "./PantosBaseToken.t.sol";
+import {VisionBaseTokenTest} from "./VisionBaseToken.t.sol";
 
-contract BitpandaEcosystemTokenTest is PantosBaseTokenTest {
+contract BitpandaEcosystemTokenTest is VisionBaseTokenTest {
     BitpandaEcosystemTokenHarness bestToken;
 
     function setUp() public {
@@ -38,7 +38,7 @@ contract BitpandaEcosystemTokenTest is PantosBaseTokenTest {
 
     function test_pause_WhenPaused() external {
         vm.prank(SUPER_CRITICAL_OPS);
-        bestToken.setPantosForwarder(PANTOS_FORWARDER_ADDRESS);
+        bestToken.setVisionForwarder(VISION_FORWARDER_ADDRESS);
         bytes memory calldata_ = abi.encodeWithSelector(
             bestToken.pause.selector
         );
@@ -72,7 +72,7 @@ contract BitpandaEcosystemTokenTest is PantosBaseTokenTest {
 
     function test_unpause_ByNonSuperCriticalOps() external {
         vm.prank(SUPER_CRITICAL_OPS);
-        bestToken.setPantosForwarder(PANTOS_FORWARDER_ADDRESS);
+        bestToken.setVisionForwarder(VISION_FORWARDER_ADDRESS);
         bytes memory calldata_ = abi.encodeWithSelector(
             bestToken.unpause.selector
         );
@@ -83,7 +83,7 @@ contract BitpandaEcosystemTokenTest is PantosBaseTokenTest {
     function test_unpause_WithNoForwarderSet() external {
         vm.expectRevert(
             abi.encodePacked(
-                "BitpandaEcosystemToken: PantosForwarder has not been set"
+                "BitpandaEcosystemToken: VisionForwarder has not been set"
             )
         );
 
@@ -91,26 +91,26 @@ contract BitpandaEcosystemTokenTest is PantosBaseTokenTest {
         bestToken.unpause();
     }
 
-    function test_setPantosForwarder() external {
+    function test_setVisionForwarder() external {
         initializeToken();
 
-        assertEq(bestToken.getPantosForwarder(), PANTOS_FORWARDER_ADDRESS);
+        assertEq(bestToken.getVisionForwarder(), VISION_FORWARDER_ADDRESS);
     }
 
-    function test_setPantosForwarder_WhenNotpaused() external {
+    function test_setVisionForwarder_WhenNotpaused() external {
         initializeToken();
         bytes memory calldata_ = abi.encodeWithSelector(
-            bestToken.setPantosForwarder.selector,
-            PANTOS_FORWARDER_ADDRESS
+            bestToken.setVisionForwarder.selector,
+            VISION_FORWARDER_ADDRESS
         );
 
         whenPausedTest(address(bestToken), calldata_);
     }
 
-    function test_setPantosForwarder_ByNonOwner() external {
+    function test_setVisionForwarder_ByNonOwner() external {
         bytes memory calldata_ = abi.encodeWithSelector(
-            bestToken.setPantosForwarder.selector,
-            PANTOS_FORWARDER_ADDRESS
+            bestToken.setVisionForwarder.selector,
+            VISION_FORWARDER_ADDRESS
         );
 
         onlyOwnerTest(address(bestToken), calldata_);
@@ -151,25 +151,25 @@ contract BitpandaEcosystemTokenTest is PantosBaseTokenTest {
         assertEq(bestToken.getOwner(), SUPER_CRITICAL_OPS);
     }
 
-    function test_unsetPantosForwarder() external {
+    function test_unsetVisionForwarder() external {
         initializeToken();
         vm.expectEmit();
-        emit IPantosToken.PantosForwarderUnset();
+        emit IVisionToken.VisionForwarderUnset();
 
         vm.prank(SUPER_CRITICAL_OPS);
-        bestToken.exposed_unsetPantosForwarder();
+        bestToken.exposed_unsetVisionForwarder();
 
-        assertEq(bestToken.getPantosForwarder(), ADDRESS_ZERO);
+        assertEq(bestToken.getVisionForwarder(), ADDRESS_ZERO);
     }
 
     function initializeToken() public override {
         vm.startPrank(SUPER_CRITICAL_OPS);
-        bestToken.setPantosForwarder(PANTOS_FORWARDER_ADDRESS);
+        bestToken.setVisionForwarder(VISION_FORWARDER_ADDRESS);
         bestToken.unpause();
         vm.stopPrank();
     }
 
-    function token() public view override returns (PantosBaseToken) {
+    function token() public view override returns (VisionBaseToken) {
         return bestToken;
     }
 
@@ -189,7 +189,7 @@ contract BitpandaEcosystemTokenHarness is BitpandaEcosystemToken {
         address accessController
     ) BitpandaEcosystemToken(initialSupply, accessController) {}
 
-    function exposed_unsetPantosForwarder() external {
-        _unsetPantosForwarder();
+    function exposed_unsetVisionForwarder() external {
+        _unsetVisionForwarder();
     }
 }

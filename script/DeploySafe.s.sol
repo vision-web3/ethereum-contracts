@@ -15,7 +15,7 @@ import {SafeAddresses} from "./helpers/SafeAddresses.s.sol";
  * @title Deploy safe contracts
  *
  * @notice Deploy the gnosis safe contracts which act as the multi-sig
- * Pantos roles.
+ * Vision roles.
  *
  * @dev Usage
  * Deploy by any gas paying account:
@@ -135,7 +135,7 @@ contract DeploySafe is SafeAddresses {
         vm.stopBroadcast();
 
         writeSafeInfo(safeAddresses);
-        exportPantosRolesAddresses(
+        exportVisionRolesAddresses(
             address(pauserSafe),
             address(deployerSafe),
             address(mediumCriticalOpsSafe),

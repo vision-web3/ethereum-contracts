@@ -7,36 +7,36 @@ import {DiamondLoupeFacet} from "@diamond/facets/DiamondLoupeFacet.sol";
 
 import {AccessController} from "../../src/access/AccessController.sol";
 import {DiamondCutFacet} from "../../src/facets/DiamondCutFacet.sol";
-import {IPantosHub} from "../../src/interfaces/IPantosHub.sol";
-import {PantosHubInit} from "../../src/upgradeInitializers/PantosHubInit.sol";
-import {PantosHubProxy} from "../../src/PantosHubProxy.sol";
-import {PantosForwarder} from "../../src/PantosForwarder.sol";
-import {PantosToken} from "../../src/PantosToken.sol";
-import {PantosTypes} from "../../src/interfaces/PantosTypes.sol";
+import {IVisionHub} from "../../src/interfaces/IVisionHub.sol";
+import {VisionHubInit} from "../../src/upgradeInitializers/VisionHubInit.sol";
+import {VisionHubProxy} from "../../src/VisionHubProxy.sol";
+import {VisionForwarder} from "../../src/VisionForwarder.sol";
+import {VisionToken} from "../../src/VisionToken.sol";
+import {VisionTypes} from "../../src/interfaces/VisionTypes.sol";
 
-import {PantosRegistryFacet} from "../../src/facets/PantosRegistryFacet.sol";
-import {PantosTransferFacet} from "../../src/facets/PantosTransferFacet.sol";
+import {VisionRegistryFacet} from "../../src/facets/VisionRegistryFacet.sol";
+import {VisionTransferFacet} from "../../src/facets/VisionTransferFacet.sol";
 
-import {PantosBaseAddresses} from "../helpers/PantosBaseAddresses.s.sol";
-import {PantosHubRedeployer} from "../helpers/PantosHubRedeployer.s.sol";
-import {PantosFacets} from "../helpers/PantosHubDeployer.s.sol";
+import {VisionBaseAddresses} from "../helpers/VisionBaseAddresses.s.sol";
+import {VisionHubRedeployer} from "../helpers/VisionHubRedeployer.s.sol";
+import {VisionFacets} from "../helpers/VisionHubDeployer.s.sol";
 import {SafeAddresses} from "../helpers/SafeAddresses.s.sol";
 
 /**
  * @title RedeployHub
  *
- * @notice Redeploy the Pantos Hub.
- * To ensure correct functionality of the newly deployed Pantos Hub within the
- * Pantos protocol, the following steps are incorporated into this script:
+ * @notice Redeploy the Vision Hub.
+ * To ensure correct functionality of the newly deployed Vision Hub within the
+ * Vision protocol, the following steps are incorporated into this script:
  *
  * 1. Retrieve the primary validator node address from the previous
- * Pantos Hub and configure it in the new Pantos Hub.
- * 2. Retrieve the Pantos Forwarder address from the previous Pantos Hub and
- * configure it in the new Pantos Hub.
- * 3. Retrieve the Pantos token address from the previous Pantos Hub and
- * configure it in the new Pantos Hub.
- * 4. Configure the new Pantos Hub at the Pantos Forwarder.
- * 5. Migrate the tokens owned by the sender account from the old Pantos Hub
+ * Vision Hub and configure it in the new Vision Hub.
+ * 2. Retrieve the Vision Forwarder address from the previous Vision Hub and
+ * configure it in the new Vision Hub.
+ * 3. Retrieve the Vision token address from the previous Vision Hub and
+ * configure it in the new Vision Hub.
+ * 4. Configure the new Vision Hub at the Vision Forwarder.
+ * 5. Migrate the tokens owned by the sender account from the old Vision Hub
  * to the new one.
  *
  * @dev Usage
@@ -49,25 +49,25 @@ import {SafeAddresses} from "../helpers/SafeAddresses.s.sol";
  *     --sig "roleActions() -vvvv"
  */
 contract RedeployHub is
-    PantosBaseAddresses,
+    VisionBaseAddresses,
     SafeAddresses,
-    PantosHubRedeployer
+    VisionHubRedeployer
 {
     AccessController accessController;
-    PantosHubProxy newPantosHubProxy;
-    PantosHubInit newPantosHubInit;
-    PantosFacets newPantosFacets;
-    IPantosHub oldPantosHub;
+    VisionHubProxy newVisionHubProxy;
+    VisionHubInit newVisionHubInit;
+    VisionFacets newVisionFacets;
+    IVisionHub oldVisionHub;
 
     function migrateHubAtForwarder(
-        PantosForwarder pantosForwarder
-    ) public onlyPantosHubRedeployerInitialized {
-        pantosForwarder.setPantosHub(address(newPantosHubProxy));
-        pantosForwarder.unpause();
+        VisionForwarder visionForwarder
+    ) public onlyVisionHubRedeployerInitialized {
+        visionForwarder.setVisionHub(address(newVisionHubProxy));
+        visionForwarder.unpause();
         console.log(
-            "PantosForwarder.setPantosHub(%s); paused=%s",
-            address(newPantosHubProxy),
-            pantosForwarder.paused()
+            "VisionForwarder.setVisionHub(%s); paused=%s",
+            address(newVisionHubProxy),
+            visionForwarder.paused()
         );
     }
 
@@ -76,56 +76,56 @@ contract RedeployHub is
 
         vm.startBroadcast();
         (
-            newPantosHubProxy,
-            newPantosHubInit,
-            newPantosFacets
-        ) = deployPantosHub(accessController);
+            newVisionHubProxy,
+            newVisionHubInit,
+            newVisionFacets
+        ) = deployVisionHub(accessController);
         exportRedeployedContractAddresses();
     }
 
     function roleActions() public {
         importContractAddresses();
-        initializePantosHubRedeployer(oldPantosHub);
+        initializeVisionHubRedeployer(oldVisionHub);
 
-        uint256 nextTransferId = oldPantosHub.getNextTransferId();
-        uint256 commitmentWaitPeriod = oldPantosHub.getCommitmentWaitPeriod();
+        uint256 nextTransferId = oldVisionHub.getNextTransferId();
+        uint256 commitmentWaitPeriod = oldVisionHub.getCommitmentWaitPeriod();
 
         vm.startBroadcast(accessController.pauser());
-        pausePantosHub(oldPantosHub);
+        pauseVisionHub(oldVisionHub);
         vm.stopBroadcast();
 
         vm.startBroadcast(accessController.deployer());
         diamondCutFacets(
-            newPantosHubProxy,
-            newPantosHubInit,
-            newPantosFacets,
+            newVisionHubProxy,
+            newVisionHubInit,
+            newVisionFacets,
             nextTransferId
         );
         vm.stopBroadcast();
 
-        IPantosHub newPantosHub = IPantosHub(address(newPantosHubProxy));
-        PantosForwarder pantosForwarder = PantosForwarder(
-            oldPantosHub.getPantosForwarder()
+        IVisionHub newVisionHub = IVisionHub(address(newVisionHubProxy));
+        VisionForwarder visionForwarder = VisionForwarder(
+            oldVisionHub.getVisionForwarder()
         );
 
         vm.startBroadcast(accessController.superCriticalOps());
-        initializePantosHub(
-            newPantosHub,
-            pantosForwarder,
-            PantosToken(oldPantosHub.getPantosToken()),
-            oldPantosHub.getPrimaryValidatorNode(),
+        initializeVisionHub(
+            newVisionHub,
+            visionForwarder,
+            VisionToken(oldVisionHub.getVisionToken()),
+            oldVisionHub.getPrimaryValidatorNode(),
             commitmentWaitPeriod
         );
         vm.stopBroadcast();
 
-        if (!pantosForwarder.paused()) {
+        if (!visionForwarder.paused()) {
             vm.broadcast(accessController.pauser());
-            pantosForwarder.pause();
+            visionForwarder.pause();
         }
 
         vm.startBroadcast(accessController.superCriticalOps());
-        migrateHubAtForwarder(pantosForwarder);
-        migrateTokensFromOldHubToNewHub(newPantosHub);
+        migrateHubAtForwarder(visionForwarder);
+        migrateTokensFromOldHubToNewHub(newVisionHub);
         vm.stopBroadcast();
 
         overrideWithRedeployedAddresses();
@@ -136,27 +136,27 @@ contract RedeployHub is
         ContractAddress[] memory contractAddresses = new ContractAddress[](6);
         contractAddresses[0] = ContractAddress(
             Contract.HUB_PROXY,
-            address(newPantosHubProxy)
+            address(newVisionHubProxy)
         );
         contractAddresses[1] = ContractAddress(
             Contract.HUB_INIT,
-            address(newPantosHubInit)
+            address(newVisionHubInit)
         );
         contractAddresses[2] = ContractAddress(
             Contract.DIAMOND_CUT_FACET,
-            address(newPantosFacets.dCut)
+            address(newVisionFacets.dCut)
         );
         contractAddresses[3] = ContractAddress(
             Contract.DIAMOND_LOUPE_FACET,
-            address(newPantosFacets.dLoupe)
+            address(newVisionFacets.dLoupe)
         );
         contractAddresses[4] = ContractAddress(
             Contract.REGISTRY_FACET,
-            address(newPantosFacets.registry)
+            address(newVisionFacets.registry)
         );
         contractAddresses[5] = ContractAddress(
             Contract.TRANSFER_FACET,
-            address(newPantosFacets.transfer)
+            address(newVisionFacets.transfer)
         );
         exportContractAddresses(contractAddresses, true);
     }
@@ -166,24 +166,24 @@ contract RedeployHub is
         readRedeployedContractAddresses();
 
         // New contracts
-        newPantosHubProxy = PantosHubProxy(
+        newVisionHubProxy = VisionHubProxy(
             payable(getContractAddress(Contract.HUB_PROXY, true))
         );
 
-        newPantosHubInit = PantosHubInit(
+        newVisionHubInit = VisionHubInit(
             getContractAddress(Contract.HUB_INIT, true)
         );
-        newPantosFacets = PantosFacets(
+        newVisionFacets = VisionFacets(
             DiamondCutFacet(
                 getContractAddress(Contract.DIAMOND_CUT_FACET, true)
             ),
             DiamondLoupeFacet(
                 getContractAddress(Contract.DIAMOND_LOUPE_FACET, true)
             ),
-            PantosRegistryFacet(
+            VisionRegistryFacet(
                 getContractAddress(Contract.REGISTRY_FACET, true)
             ),
-            PantosTransferFacet(
+            VisionTransferFacet(
                 getContractAddress(Contract.TRANSFER_FACET, true)
             )
         );
@@ -192,7 +192,7 @@ contract RedeployHub is
             getContractAddress(Contract.ACCESS_CONTROLLER, false)
         );
 
-        oldPantosHub = IPantosHub(
+        oldVisionHub = IVisionHub(
             payable(getContractAddress(Contract.HUB_PROXY, false))
         );
     }

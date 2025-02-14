@@ -23,5 +23,5 @@ test:
 
 .PHONY: coverage
 coverage:
-	python3 -m pytest --cov-report term-missing --cov=pantos tests
+	python3 -m pytest --cov-report term-missing --cov=vision tests
 	rm .coverage

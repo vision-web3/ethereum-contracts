@@ -4,12 +4,12 @@ pragma solidity 0.8.26;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import {PantosBaseToken} from "../PantosBaseToken.sol";
+import {VisionBaseToken} from "../VisionBaseToken.sol";
 
 /**
- * @title Pantos token
+ * @title Vision token
  */
-contract MigrationToken is PantosBaseToken {
+contract MigrationToken is VisionBaseToken {
     /**
      * @dev msg.sender receives all existing tokens
      */
@@ -18,11 +18,11 @@ contract MigrationToken is PantosBaseToken {
         string memory symbol,
         uint8 decimals,
         uint256 supply
-    ) PantosBaseToken(name, symbol, decimals, msg.sender) {
+    ) VisionBaseToken(name, symbol, decimals, msg.sender) {
         ERC20._mint(msg.sender, supply);
     }
 
-    function setPantosForwarder(address pantosForwarder) external onlyOwner {
-        _setPantosForwarder(pantosForwarder);
+    function setVisionForwarder(address visionForwarder) external onlyOwner {
+        _setVisionForwarder(visionForwarder);
     }
 }

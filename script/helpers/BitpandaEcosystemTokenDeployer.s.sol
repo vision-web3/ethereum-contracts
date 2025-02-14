@@ -4,14 +4,14 @@ pragma solidity 0.8.26;
 /* solhint-disable no-console*/
 import {console2} from "forge-std/console2.sol";
 
-import {IPantosHub} from "../../src/interfaces/IPantosHub.sol";
-import {PantosForwarder} from "../../src/PantosForwarder.sol";
+import {IVisionHub} from "../../src/interfaces/IVisionHub.sol";
+import {VisionForwarder} from "../../src/VisionForwarder.sol";
 import {BitpandaEcosystemToken} from "../../src/BitpandaEcosystemToken.sol";
 import {AccessController} from "../../src/access/AccessController.sol";
 
-import {PantosBaseScript} from "./PantosBaseScript.s.sol";
+import {VisionBaseScript} from "./VisionBaseScript.s.sol";
 
-abstract contract BitpandaEcosystemTokenDeployer is PantosBaseScript {
+abstract contract BitpandaEcosystemTokenDeployer is VisionBaseScript {
     function deployBitpandaEcosystemToken(
         uint256 initialSupply,
         AccessController accessController
@@ -31,13 +31,13 @@ abstract contract BitpandaEcosystemTokenDeployer is PantosBaseScript {
 
     function initializeBitpandaEcosystemToken(
         BitpandaEcosystemToken bitpandaEcosystemToken,
-        IPantosHub pantosHubProxy,
-        PantosForwarder pantosForwarder
+        IVisionHub visionHubProxy,
+        VisionForwarder visionForwarder
     ) public {
-        bitpandaEcosystemToken.setPantosForwarder(address(pantosForwarder));
+        bitpandaEcosystemToken.setVisionForwarder(address(visionForwarder));
 
-        // Register token at Pantos hub
-        pantosHubProxy.registerToken(address(bitpandaEcosystemToken));
+        // Register token at Vision hub
+        visionHubProxy.registerToken(address(bitpandaEcosystemToken));
 
         bitpandaEcosystemToken.unpause();
 

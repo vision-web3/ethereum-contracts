@@ -5,12 +5,12 @@ pragma solidity 0.8.26;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
-import {PantosBaseToken} from "../PantosBaseToken.sol";
+import {VisionBaseToken} from "../VisionBaseToken.sol";
 
 /**
- * @title Pantos token
+ * @title Vision token
  */
-contract MigrationTokenBurnable is PantosBaseToken, ERC20Burnable {
+contract MigrationTokenBurnable is VisionBaseToken, ERC20Burnable {
     /**
      * @dev msg.sender receives all existing tokens.
      */
@@ -19,47 +19,47 @@ contract MigrationTokenBurnable is PantosBaseToken, ERC20Burnable {
         string memory symbol_,
         uint8 decimals_,
         uint256 supply_
-    ) PantosBaseToken(name_, symbol_, decimals_, msg.sender) {
+    ) VisionBaseToken(name_, symbol_, decimals_, msg.sender) {
         ERC20._mint(msg.sender, supply_);
     }
 
-    function setPantosForwarder(address pantosForwarder) external onlyOwner {
-        _setPantosForwarder(pantosForwarder);
+    function setVisionForwarder(address visionForwarder) external onlyOwner {
+        _setVisionForwarder(visionForwarder);
     }
 
     /**
-     * @dev See {PantosBaseToken-decimals} and {ERC20-decimals}.
+     * @dev See {VisionBaseToken-decimals} and {ERC20-decimals}.
      */
     function decimals()
         public
         view
-        override(PantosBaseToken, ERC20)
+        override(VisionBaseToken, ERC20)
         returns (uint8)
     {
-        return PantosBaseToken.decimals();
+        return VisionBaseToken.decimals();
     }
 
     /**
-     * @dev See {PantosBaseToken-symbol} and {ERC20-symbol}.
+     * @dev See {VisionBaseToken-symbol} and {ERC20-symbol}.
      */
     function symbol()
         public
         view
-        override(PantosBaseToken, ERC20)
+        override(VisionBaseToken, ERC20)
         returns (string memory)
     {
-        return PantosBaseToken.symbol();
+        return VisionBaseToken.symbol();
     }
 
     /**
-     * @dev See {PantosBaseToken-name} and {ERC20-name}.
+     * @dev See {VisionBaseToken-name} and {ERC20-name}.
      */
     function name()
         public
         view
-        override(PantosBaseToken, ERC20)
+        override(VisionBaseToken, ERC20)
         returns (string memory)
     {
-        return PantosBaseToken.name();
+        return VisionBaseToken.name();
     }
 }

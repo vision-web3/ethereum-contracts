@@ -129,14 +129,14 @@ deploy_for_chain() {
     forge script "$ROOT_DIR/script/SubmitSafeTxs.s.sol" --account gas_payer --chain-id $chain_id \
         --password '' --rpc-url http://127.0.0.1:$port --sig "run()" --broadcast -vvv
 
-    # send the PAN tokens from the super critical role safe to the gas payer
+    # send the VSN tokens from the super critical role safe to the gas payer
     calldata=$(cast calldata "transfer(address,uint256)" $GAS_PAYER_ADDRESS 10000000000000000)
     super_critical_ops_safe_address=$(jq -r '.super_critical_ops' "$ROOT_DIR/$chain-ROLES.json")
-    pan_token_contract_address=$(jq -r '.pan' "$ROOT_DIR/$chain.json")
+    vsn_token_contract_address=$(jq -r '.vsn' "$ROOT_DIR/$chain.json")
     nonce=$(cast call $super_critical_ops_safe_address "nonce()(uint256)" --rpc-url http://127.0.0.1:$port)
     tx_hash=$(cast call $super_critical_ops_safe_address \
         "getTransactionHash(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,uint256)" \
-        $pan_token_contract_address 0 $calldata 0 0 0 0 0x0000000000000000000000000000000000000000 \
+        $vsn_token_contract_address 0 $calldata 0 0 0 0 0x0000000000000000000000000000000000000000 \
         0x0000000000000000000000000000000000000000 $nonce --rpc-url http://127.0.0.1:$port)
     cast send --account gas_payer --password '' $SUPER_CRITICAL_OPS_SIGNER_ADDRESS --value 1ether \
         --rpc-url http://127.0.0.1:$port --gas-price 10gwei --confirmations 1
@@ -144,12 +144,12 @@ deploy_for_chain() {
         "approveHash(bytes32)" $tx_hash --rpc-url http://127.0.0.1:$port --gas-price 10gwei --confirmations 1
     cast send --account gas_payer --password '' $super_critical_ops_safe_address \
         "execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)" \
-        $pan_token_contract_address 0 $calldata 0 0 0 0 0x0000000000000000000000000000000000000000 \
+        $vsn_token_contract_address 0 $calldata 0 0 0 0 0x0000000000000000000000000000000000000000 \
         0x0000000000000000000000000000000000000000 \
         "0x000000000000000000000000${SUPER_CRITICAL_OPS_SIGNER_ADDRESS:2}000000000000000000000000000000000000000000000000000000000000000001" \
         --rpc-url http://127.0.0.1:$port --gas-price 10gwei --confirmations 1
 
-    jq --arg chain "$chain" -r 'to_entries | map({key: (if .key == "hub_proxy" then "hub" elif .key == "pan" then "pan_token" else .key end), value: .value}) | map("\($chain|ascii_upcase)_\(.key|ascii_upcase)=\(.value|tostring)") | .[]' "$ROOT_DIR/$chain.json" > "$chain_dir/$chain.env"
+    jq --arg chain "$chain" -r 'to_entries | map({key: (if .key == "hub_proxy" then "hub" elif .key == "vsn" then "vsn_token" else .key end), value: .value}) | map("\($chain|ascii_upcase)_\(.key|ascii_upcase)=\(.value|tostring)") | .[]' "$ROOT_DIR/$chain.json" > "$chain_dir/$chain.env"
     cat "$chain_dir/$chain.env" > "$chain_dir/all.env"
     cp "$ROOT_DIR/$chain.json" "$chain_dir/$chain.json"
     cp "$ROOT_DIR/$chain-ROLES.json" "$chain_dir/$chain-ROLES.json"

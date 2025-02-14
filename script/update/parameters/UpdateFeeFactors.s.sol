@@ -4,27 +4,27 @@ pragma solidity 0.8.26;
 /* solhint-disable no-console*/
 import {console} from "forge-std/console.sol";
 
-import {IPantosHub} from "../../../src/interfaces/IPantosHub.sol";
-import {PantosTypes} from "../../../src/interfaces/PantosTypes.sol";
+import {IVisionHub} from "../../../src/interfaces/IVisionHub.sol";
+import {VisionTypes} from "../../../src/interfaces/VisionTypes.sol";
 import {AccessController} from "../../../src/access/AccessController.sol";
 
-import {PantosBaseAddresses} from "./../../helpers/PantosBaseAddresses.s.sol";
+import {VisionBaseAddresses} from "./../../helpers/VisionBaseAddresses.s.sol";
 import {SafeAddresses} from "../../helpers/SafeAddresses.s.sol";
 import {UpdateBase} from "./UpdateBase.s.sol";
 
 /**
  * @title UpdateFeeFactors
  *
- * @notice Update the fee factors at the Pantos Hub.
+ * @notice Update the fee factors at the Vision Hub.
  *
  * @dev Usage
  * forge script ./script/update/parameters/UpdateFeeFactors.s.sol --rpc-url <rpc alias>
  *      --sig "roleActions()"
  */
-contract UpdateFeeFactors is PantosBaseAddresses, SafeAddresses, UpdateBase {
+contract UpdateFeeFactors is VisionBaseAddresses, SafeAddresses, UpdateBase {
     function roleActions() public {
         readContractAddresses(determineBlockchain());
-        IPantosHub pantosHubProxy = IPantosHub(
+        IVisionHub visionHubProxy = IVisionHub(
             getContractAddress(Contract.HUB_PROXY, false)
         );
         AccessController accessController = AccessController(
@@ -36,15 +36,15 @@ contract UpdateFeeFactors is PantosBaseAddresses, SafeAddresses, UpdateBase {
             Blockchain memory blockchain = getBlockchainById(BlockchainId(i));
             if (!blockchain.skip) {
                 uint256 blockchainId = uint256(blockchain.blockchainId);
-                PantosTypes.UpdatableUint256
-                    memory onChainFeeFactor = pantosHubProxy
+                VisionTypes.UpdatableUint256
+                    memory onChainFeeFactor = visionHubProxy
                         .getValidatorFeeFactor(blockchainId);
                 UpdateBase.UpdateState updateState = isInitiateOrExecute(
                     onChainFeeFactor,
                     blockchain.feeFactor
                 );
                 if (updateState == UpdateBase.UpdateState.INITIATE) {
-                    pantosHubProxy.initiateValidatorFeeFactorUpdate(
+                    visionHubProxy.initiateValidatorFeeFactorUpdate(
                         blockchainId,
                         blockchain.feeFactor
                     );
@@ -54,7 +54,7 @@ contract UpdateFeeFactors is PantosBaseAddresses, SafeAddresses, UpdateBase {
                         blockchain.feeFactor
                     );
                 } else if (updateState == UpdateBase.UpdateState.EXECUTE) {
-                    pantosHubProxy.executeValidatorFeeFactorUpdate(
+                    visionHubProxy.executeValidatorFeeFactorUpdate(
                         blockchainId
                     );
                     console.log(

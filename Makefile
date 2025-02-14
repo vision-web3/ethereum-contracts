@@ -7,20 +7,20 @@ LIB_PATH := lib
 OPENZEPPELIN_LIB_PATH := ${LIB_PATH}/openzeppelin-contracts
 
 JSON_PATH := out
-HUB_JSON_PATH := ${JSON_PATH}/IPantosHub.sol/IPantosHub.json
-FORWARDER_JSON_PATH := ${JSON_PATH}/IPantosForwarder.sol/IPantosForwarder.json
-TOKEN_JSON_PATH := ${JSON_PATH}/IPantosToken.sol/IPantosToken.json
+HUB_JSON_PATH := ${JSON_PATH}/IVisionHub.sol/IVisionHub.json
+FORWARDER_JSON_PATH := ${JSON_PATH}/IVisionForwarder.sol/IVisionForwarder.json
+TOKEN_JSON_PATH := ${JSON_PATH}/IVisionToken.sol/IVisionToken.json
 
 ABI_PATH := abis
-HUB_ABI_PATH := ${ABI_PATH}/pantos-hub.abi
-FORWARDER_ABI_PATH := ${ABI_PATH}/pantos-forwarder.abi
-TOKEN_ABI_PATH := ${ABI_PATH}/pantos-token.abi
+HUB_ABI_PATH := ${ABI_PATH}/vision-hub.abi
+FORWARDER_ABI_PATH := ${ABI_PATH}/vision-forwarder.abi
+TOKEN_ABI_PATH := ${ABI_PATH}/vision-token.abi
 
 DOC_PATH := docs
 INTERFACE_DOC_PATH := ${DOC_PATH}/src/src/interfaces
-REGISTRY_DOC_PATH := ${INTERFACE_DOC_PATH}/IPantosRegistry.sol/interface.IPantosRegistry.md
-TRANSFER_DOC_PATH := ${INTERFACE_DOC_PATH}/IPantosTransfer.sol/interface.IPantosTransfer.md
-TOKEN_DOC_PATH := ${INTERFACE_DOC_PATH}/IPantosToken.sol/interface.IPantosToken.md
+REGISTRY_DOC_PATH := ${INTERFACE_DOC_PATH}/IVisionRegistry.sol/interface.IVisionRegistry.md
+TRANSFER_DOC_PATH := ${INTERFACE_DOC_PATH}/IVisionTransfer.sol/interface.IVisionTransfer.md
+TOKEN_DOC_PATH := ${INTERFACE_DOC_PATH}/IVisionToken.sol/interface.IVisionToken.md
 BEP20_DOC_PATH := ${INTERFACE_DOC_PATH}/IBEP20.sol/interface.IBEP20.md
 
 OPENZEPPELIN_DOC_PATH := ${DOC_PATH}/openzeppelin
@@ -28,12 +28,12 @@ ERC20_DOC_PATH := ${OPENZEPPELIN_DOC_PATH}/src/contracts/token/ERC20/IERC20.sol/
 ERC165_DOC_PATH := ${OPENZEPPELIN_DOC_PATH}/src/contracts/utils/introspection/IERC165.sol/interface.IERC165.md
 
 ABI_DOC_PATH := ${DOC_PATH}/abis
-HUB_ABI_DOC_PATH := ${ABI_DOC_PATH}/pantos-hub-abi.md
-TOKEN_ABI_DOC_PATH := ${ABI_DOC_PATH}/pantos-token-abi.md
+HUB_ABI_DOC_PATH := ${ABI_DOC_PATH}/vision-hub-abi.md
+TOKEN_ABI_DOC_PATH := ${ABI_DOC_PATH}/vision-token-abi.md
 
 TEMPLATE_PATH := templates
-HUB_ABI_DOC_TEMPLATE_PATH := ${TEMPLATE_PATH}/pantos-hub-abi.md
-TOKEN_ABI_DOC_TEMPLATE_PATH := ${TEMPLATE_PATH}/pantos-token-abi.md
+HUB_ABI_DOC_TEMPLATE_PATH := ${TEMPLATE_PATH}/vision-hub-abi.md
+TOKEN_ABI_DOC_TEMPLATE_PATH := ${TEMPLATE_PATH}/vision-token-abi.md
 
 .PHONY: build
 build:
@@ -93,20 +93,20 @@ docs:
 docs-abis: abis docs docs-openzeppelin
 	@set -e; \
 	mkdir -p "${ABI_DOC_PATH}"; \
-	export PANTOS_REGISTRY_FUNCTIONS=$$(cat "${REGISTRY_DOC_PATH}" | sed '1,/## Functions/d' | sed '/## Events/,$$d'); \
-	export PANTOS_TRANSFER_FUNCTIONS=$$(cat "${TRANSFER_DOC_PATH}" | sed '1,/## Functions/d' | sed '/## Events/,$$d'); \
-	export PANTOS_REGISTRY_EVENTS=$$(cat "${REGISTRY_DOC_PATH}" | sed '1,/## Events/d'); \
-	export PANTOS_TRANSFER_EVENTS=$$(cat "${TRANSFER_DOC_PATH}" | sed '1,/## Events/d'); \
-	export PANTOS_HUB_ABI=$$(cat "${HUB_ABI_PATH}"); \
+	export VISION_REGISTRY_FUNCTIONS=$$(cat "${REGISTRY_DOC_PATH}" | sed '1,/## Functions/d' | sed '/## Events/,$$d'); \
+	export VISION_TRANSFER_FUNCTIONS=$$(cat "${TRANSFER_DOC_PATH}" | sed '1,/## Functions/d' | sed '/## Events/,$$d'); \
+	export VISION_REGISTRY_EVENTS=$$(cat "${REGISTRY_DOC_PATH}" | sed '1,/## Events/d'); \
+	export VISION_TRANSFER_EVENTS=$$(cat "${TRANSFER_DOC_PATH}" | sed '1,/## Events/d'); \
+	export VISION_HUB_ABI=$$(cat "${HUB_ABI_PATH}"); \
 	envsubst < "${HUB_ABI_DOC_TEMPLATE_PATH}" > "${HUB_ABI_DOC_PATH}"; \
 	sed -i 's/\[\([^][]*\)\]([^()]*)/\1/g' "${HUB_ABI_DOC_PATH}"; \
-	export PANTOS_TOKEN_FUNCTIONS=$$(cat "${TOKEN_DOC_PATH}" | sed '1,/## Functions/d' | sed '/## Events/,$$d'); \
+	export VISION_TOKEN_FUNCTIONS=$$(cat "${TOKEN_DOC_PATH}" | sed '1,/## Functions/d' | sed '/## Events/,$$d'); \
 	export ERC20_FUNCTIONS=$$(cat "${ERC20_DOC_PATH}" | sed '1,/## Functions/d' | sed '/## Events/,$$d'); \
 	export BEP20_FUNCTIONS=$$(cat "${BEP20_DOC_PATH}" | sed '1,/## Functions/d'); \
 	export ERC165_FUNCTIONS=$$(cat "${ERC165_DOC_PATH}" | sed '1,/## Functions/d'); \
-	export PANTOS_TOKEN_EVENTS=$$(cat "${TOKEN_DOC_PATH}" | sed '1,/## Events/d'); \
+	export VISION_TOKEN_EVENTS=$$(cat "${TOKEN_DOC_PATH}" | sed '1,/## Events/d'); \
 	export ERC20_EVENTS=$$(cat "${ERC20_DOC_PATH}" | sed '1,/## Events/d'); \
-	export PANTOS_TOKEN_ABI=$$(cat "${TOKEN_ABI_PATH}"); \
+	export VISION_TOKEN_ABI=$$(cat "${TOKEN_ABI_PATH}"); \
 	envsubst < "${TOKEN_ABI_DOC_TEMPLATE_PATH}" > "${TOKEN_ABI_DOC_PATH}"; \
 	sed -i 's/\[\([^][]*\)\]([^()]*)/\1/g' "${TOKEN_ABI_DOC_PATH}"
 
@@ -148,7 +148,7 @@ analyze-slither:
 
 .PHONY: analyze-mythril
 analyze-mythril:
-	@IGNORE_LIST="src/PantosWrapper.sol src/PantosBaseToken.sol src/interfaces/IPantosRegistry.sol src/interfaces/IPantosTransfer.sol src/interfaces/IPantosWrapper.sol src/interfaces/IPantosForwarder.sol src/interfaces/IPantosToken.sol src/interfaces/IBEP20.sol" && \
+	@IGNORE_LIST="src/VisionWrapper.sol src/VisionBaseToken.sol src/interfaces/IVisionRegistry.sol src/interfaces/IVisionTransfer.sol src/interfaces/IVisionWrapper.sol src/interfaces/IVisionForwarder.sol src/interfaces/IVisionToken.sol src/interfaces/IBEP20.sol" && \
     IGNORE_FIND=$$(echo $$IGNORE_LIST | sed 's/[^ ]* */! -name &/g') && \
     docker run --platform linux/amd64 -v $$PWD:/share --entrypoint /bin/sh mythril/myth -c 'cd /share && find src -name "*.sol" $${IGNORE_FIND} -print | xargs -I {} sh -c "myth analyze --solc-json mythril.config.json -o markdown {} || echo $$? > mythril_error_code"' && \
     if [ -f mythril_error_code ]; then exit $$(cat mythril_error_code); fi

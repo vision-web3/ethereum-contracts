@@ -7,11 +7,11 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 /**
  * @title Access control library
  *
- * @notice Library to manage access control for the Pantos Hub diamond.
+ * @notice Library to manage access control for the Vision Hub diamond.
  */
 library LibAccessControl {
     bytes32 constant ACCESS_CONTROL_STORAGE_POSITION =
-        keccak256("pantos.access.control");
+        keccak256("vision.access.control");
 
     struct AccessControlStorage {
         IAccessControl accessController;

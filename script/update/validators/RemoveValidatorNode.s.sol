@@ -5,15 +5,15 @@ pragma solidity 0.8.26;
 import {console} from "forge-std/console.sol";
 
 import {AccessController} from "../../../src/access/AccessController.sol";
-import {PantosForwarder} from "../../../src/PantosForwarder.sol";
+import {VisionForwarder} from "../../../src/VisionForwarder.sol";
 
-import {PantosBaseAddresses} from "./../../helpers/PantosBaseAddresses.s.sol";
+import {VisionBaseAddresses} from "./../../helpers/VisionBaseAddresses.s.sol";
 import {SafeAddresses} from "./../../helpers/SafeAddresses.s.sol";
 
 /**
  * @title RemoveValidatorNode
  *
- * @notice Remove a validator node from the Pantos Forwarder.
+ * @notice Remove a validator node from the Vision Forwarder.
  *
  * @dev Usage
  * 1. Remove a validator node.
@@ -23,20 +23,20 @@ import {SafeAddresses} from "./../../helpers/SafeAddresses.s.sol";
  * forge script ./script/update/validators/RemoveValidatorNode.s.sol --rpc-url <rpc alias>
  *      --sig "roleActions(address,uint256)" <validatorNode> <newMinimumThreshold>
  */
-contract RemoveValidatorNode is PantosBaseAddresses, SafeAddresses {
+contract RemoveValidatorNode is VisionBaseAddresses, SafeAddresses {
     AccessController accessController;
-    PantosForwarder public pantosForwarder;
+    VisionForwarder public visionForwarder;
 
     function roleActions(address validatorNode) public {
         readContractAddresses(determineBlockchain());
         accessController = AccessController(
             getContractAddress(Contract.ACCESS_CONTROLLER, false)
         );
-        pantosForwarder = PantosForwarder(
+        visionForwarder = VisionForwarder(
             getContractAddress(Contract.FORWARDER, false)
         );
 
-        address[] memory validatorNodes = pantosForwarder.getValidatorNodes();
+        address[] memory validatorNodes = visionForwarder.getValidatorNodes();
         bool found = false;
         for (uint256 i = 0; i < validatorNodes.length; i++) {
             if (validatorNodes[i] == validatorNode) {
@@ -50,13 +50,13 @@ contract RemoveValidatorNode is PantosBaseAddresses, SafeAddresses {
         }
 
         vm.broadcast(accessController.pauser());
-        pantosForwarder.pause();
+        visionForwarder.pause();
 
         vm.startBroadcast(accessController.superCriticalOps());
-        pantosForwarder.removeValidatorNode(validatorNode);
-        pantosForwarder.unpause();
+        visionForwarder.removeValidatorNode(validatorNode);
+        visionForwarder.unpause();
         console.log("Validator node %s removed", validatorNode);
-        console.log("Pantos forwarder paused: %s", pantosForwarder.paused());
+        console.log("Vision forwarder paused: %s", visionForwarder.paused());
         vm.stopBroadcast();
 
         writeAllSafeInfo(accessController);
@@ -70,7 +70,7 @@ contract RemoveValidatorNode is PantosBaseAddresses, SafeAddresses {
         accessController = AccessController(
             getContractAddress(Contract.ACCESS_CONTROLLER, false)
         );
-        pantosForwarder = PantosForwarder(
+        visionForwarder = VisionForwarder(
             getContractAddress(Contract.FORWARDER, false)
         );
 
@@ -78,7 +78,7 @@ contract RemoveValidatorNode is PantosBaseAddresses, SafeAddresses {
             newMinimumThreshold > 0,
             "Minimum threshold must be greater than 0"
         );
-        address[] memory validatorNodes = pantosForwarder.getValidatorNodes();
+        address[] memory validatorNodes = visionForwarder.getValidatorNodes();
         bool found = false;
         for (uint256 i = 0; i < validatorNodes.length; i++) {
             if (validatorNodes[i] == validatorNode) {
@@ -92,15 +92,15 @@ contract RemoveValidatorNode is PantosBaseAddresses, SafeAddresses {
         }
 
         vm.broadcast(accessController.pauser());
-        pantosForwarder.pause();
+        visionForwarder.pause();
 
         vm.startBroadcast(accessController.superCriticalOps());
-        pantosForwarder.setMinimumValidatorNodeSignatures(newMinimumThreshold);
-        pantosForwarder.removeValidatorNode(validatorNode);
-        pantosForwarder.unpause();
+        visionForwarder.setMinimumValidatorNodeSignatures(newMinimumThreshold);
+        visionForwarder.removeValidatorNode(validatorNode);
+        visionForwarder.unpause();
         console.log("Validator node %s removed", validatorNode);
         console.log("New minimum threshold: %s", newMinimumThreshold);
-        console.log("Pantos forwarder paused: %s", pantosForwarder.paused());
+        console.log("Vision forwarder paused: %s", visionForwarder.paused());
         vm.stopBroadcast();
 
         writeAllSafeInfo(accessController);

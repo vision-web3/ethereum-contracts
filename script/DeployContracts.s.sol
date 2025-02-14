@@ -3,32 +3,32 @@ pragma solidity 0.8.26;
 
 import {DiamondLoupeFacet} from "@diamond/facets/DiamondLoupeFacet.sol";
 
-import {IPantosHub} from "../src/interfaces/IPantosHub.sol";
-import {PantosForwarder} from "../src/PantosForwarder.sol";
-import {PantosToken} from "../src/PantosToken.sol";
+import {IVisionHub} from "../src/interfaces/IVisionHub.sol";
+import {VisionForwarder} from "../src/VisionForwarder.sol";
+import {VisionToken} from "../src/VisionToken.sol";
 import {BitpandaEcosystemToken} from "../src/BitpandaEcosystemToken.sol";
-import {PantosWrapper} from "../src/PantosWrapper.sol";
+import {VisionWrapper} from "../src/VisionWrapper.sol";
 import {AccessController} from "../src/access/AccessController.sol";
-import {PantosHubProxy} from "../src/PantosHubProxy.sol";
-import {PantosHubInit} from "../src/upgradeInitializers/PantosHubInit.sol";
-import {PantosRegistryFacet} from "../src/facets/PantosRegistryFacet.sol";
-import {PantosTransferFacet} from "../src/facets/PantosTransferFacet.sol";
+import {VisionHubProxy} from "../src/VisionHubProxy.sol";
+import {VisionHubInit} from "../src/upgradeInitializers/VisionHubInit.sol";
+import {VisionRegistryFacet} from "../src/facets/VisionRegistryFacet.sol";
+import {VisionTransferFacet} from "../src/facets/VisionTransferFacet.sol";
 import {DiamondCutFacet} from "../src/facets/DiamondCutFacet.sol";
-import {PantosTokenMigrator} from "../src/PantosTokenMigrator.sol";
+import {VisionTokenMigrator} from "../src/VisionTokenMigrator.sol";
 
-import {PantosHubDeployer, PantosFacets} from "./helpers/PantosHubDeployer.s.sol";
-import {PantosForwarderDeployer} from "./helpers/PantosForwarderDeployer.s.sol";
-import {PantosWrapperDeployer} from "./helpers/PantosWrapperDeployer.s.sol";
-import {PantosTokenDeployer} from "./helpers/PantosTokenDeployer.s.sol";
+import {VisionHubDeployer, VisionFacets} from "./helpers/VisionHubDeployer.s.sol";
+import {VisionForwarderDeployer} from "./helpers/VisionForwarderDeployer.s.sol";
+import {VisionWrapperDeployer} from "./helpers/VisionWrapperDeployer.s.sol";
+import {VisionTokenDeployer} from "./helpers/VisionTokenDeployer.s.sol";
 import {BitpandaEcosystemTokenDeployer} from "./helpers/BitpandaEcosystemTokenDeployer.s.sol";
 import {AccessControllerDeployer} from "./helpers/AccessControllerDeployer.s.sol";
-import {PantosBaseAddresses} from "./helpers/PantosBaseAddresses.s.sol";
+import {VisionBaseAddresses} from "./helpers/VisionBaseAddresses.s.sol";
 import {SafeAddresses} from "./helpers/SafeAddresses.s.sol";
 
 /**
  * @title DeployContracts
  *
- * @notice Deploy and initialize the Pantos smart contracts on an
+ * @notice Deploy and initialize the Vision smart contracts on an
  * Ethereum-compatible single blockchain.
  *
  * @dev Usage
@@ -36,11 +36,11 @@ import {SafeAddresses} from "./helpers/SafeAddresses.s.sol";
  *    the old PAN does not exist):
  * forge script ./script/DeployContracts.s.sol --account <account> \
  *     --sender <sender> --rpc-url <rpc alias> --slow --force --sig \
- *     "deploy(uint256,uint256)" <panSupply> <bestSupply>
+ *     "deploy(uint256,uint256)" <vsnSupply> <bestSupply>
  *
  * 2. Deploy the remaining contracts from any gas paying account
- *    (on chains where the old PAN, new PAN, Access Controller,
- *    and the PAN migrator exist)
+ *    (on chains where the old VSN, new VSN, Access Controller,
+ *    and the VSN migrator exist)
  * forge script ./script/DeployContracts.s.sol --account <account> \
  *     --sender <sender> --rpc-url <rpc alias> --slow --force --sig \
  *     "deploy(uint256)" <bestSupply>
@@ -52,26 +52,26 @@ import {SafeAddresses} from "./helpers/SafeAddresses.s.sol";
  *          <primaryValidator> <otherValidators>
  */
 contract DeployContracts is
-    PantosBaseAddresses,
+    VisionBaseAddresses,
     SafeAddresses,
-    PantosHubDeployer,
-    PantosForwarderDeployer,
-    PantosWrapperDeployer,
-    PantosTokenDeployer,
+    VisionHubDeployer,
+    VisionForwarderDeployer,
+    VisionWrapperDeployer,
+    VisionTokenDeployer,
     BitpandaEcosystemTokenDeployer,
     AccessControllerDeployer
 {
     AccessController accessController;
-    PantosHubProxy pantosHubProxy;
-    PantosHubInit pantosHubInit;
-    PantosFacets pantosFacets;
-    PantosForwarder pantosForwarder;
-    PantosToken pantosToken;
+    VisionHubProxy visionHubProxy;
+    VisionHubInit visionHubInit;
+    VisionFacets visionFacets;
+    VisionForwarder visionForwarder;
+    VisionToken visionToken;
     BitpandaEcosystemToken bitpandaEcosystemToken;
-    PantosWrapper[] pantosWrappers;
-    PantosTokenMigrator pantosTokenMigrator;
+    VisionWrapper[] visionWrappers;
+    VisionTokenMigrator visionTokenMigrator;
 
-    function deploy(uint256 panSupply, uint256 bestSupply) public {
+    function deploy(uint256 vsnSupply, uint256 bestSupply) public {
         vm.startBroadcast();
         readRoleAddresses();
         address pauser = getRoleAddress(Role.PAUSER);
@@ -84,16 +84,16 @@ contract DeployContracts is
             mediumCriticalOps,
             superCriticalOps
         );
-        (pantosHubProxy, pantosHubInit, pantosFacets) = deployPantosHub(
+        (visionHubProxy, visionHubInit, visionFacets) = deployVisionHub(
             accessController
         );
-        pantosToken = deployPantosToken(panSupply, accessController);
-        pantosForwarder = deployPantosForwarder(accessController);
+        visionToken = deployVisionToken(vsnSupply, accessController);
+        visionForwarder = deployVisionForwarder(accessController);
         bitpandaEcosystemToken = deployBitpandaEcosystemToken(
             bestSupply,
             accessController
         );
-        pantosWrappers = deployCoinWrappers(accessController);
+        visionWrappers = deployCoinWrappers(accessController);
         vm.stopBroadcast();
 
         exportAllContractAddresses(false);
@@ -102,12 +102,12 @@ contract DeployContracts is
     function deploy(uint256 bestSupply) public {
         vm.startBroadcast();
         importMigratorAndDependencies();
-        pantosForwarder = deployPantosForwarder(accessController);
+        visionForwarder = deployVisionForwarder(accessController);
         bitpandaEcosystemToken = deployBitpandaEcosystemToken(
             bestSupply,
             accessController
         );
-        pantosWrappers = deployCoinWrappers(accessController);
+        visionWrappers = deployCoinWrappers(accessController);
         vm.stopBroadcast();
 
         exportAllContractAddresses(true);
@@ -123,20 +123,20 @@ contract DeployContracts is
         importAllContractAddresses();
         vm.broadcast(accessController.deployer());
         diamondCutFacets(
-            pantosHubProxy,
-            pantosHubInit,
-            pantosFacets,
+            visionHubProxy,
+            visionHubInit,
+            visionFacets,
             nextTransferId
         );
 
-        IPantosHub pantosHub = IPantosHub(address(pantosHubProxy));
+        IVisionHub visionHub = IVisionHub(address(visionHubProxy));
 
         vm.startBroadcast(accessController.superCriticalOps());
-        initializePantosToken(pantosToken, pantosForwarder);
-        initializePantosHub(
-            pantosHub,
-            pantosForwarder,
-            pantosToken,
+        initializeVisionToken(visionToken, visionForwarder);
+        initializeVisionHub(
+            visionHub,
+            visionForwarder,
+            visionToken,
             primaryValidator,
             commitmentWaitPeriod
         );
@@ -150,19 +150,19 @@ contract DeployContracts is
             validatorNodeAddresses[i + 1] = otherValidators[i];
         }
 
-        initializePantosForwarder(
-            pantosForwarder,
-            pantosHub,
-            pantosToken,
+        initializeVisionForwarder(
+            visionForwarder,
+            visionHub,
+            visionToken,
             minimumValidatorNodeSignatures,
             validatorNodeAddresses
         );
         initializeBitpandaEcosystemToken(
             bitpandaEcosystemToken,
-            pantosHub,
-            pantosForwarder
+            visionHub,
+            visionForwarder
         );
-        initializePantosWrappers(pantosHub, pantosForwarder, pantosWrappers);
+        initializeVisionWrappers(visionHub, visionForwarder, visionWrappers);
         vm.stopBroadcast();
         writeAllSafeInfo(accessController);
     }
@@ -171,8 +171,8 @@ contract DeployContracts is
         bool isMigratorIncludedInExport
     ) internal {
         uint256 length = isMigratorIncludedInExport
-            ? 11 + pantosWrappers.length
-            : 10 + pantosWrappers.length;
+            ? 11 + visionWrappers.length
+            : 10 + visionWrappers.length;
         ContractAddress[] memory contractAddresses = new ContractAddress[](
             length
         );
@@ -182,50 +182,50 @@ contract DeployContracts is
         );
         contractAddresses[1] = ContractAddress(
             Contract.HUB_PROXY,
-            address(pantosHubProxy)
+            address(visionHubProxy)
         );
         contractAddresses[2] = ContractAddress(
             Contract.HUB_INIT,
-            address(pantosHubInit)
+            address(visionHubInit)
         );
         contractAddresses[3] = ContractAddress(
             Contract.DIAMOND_CUT_FACET,
-            address(pantosFacets.dCut)
+            address(visionFacets.dCut)
         );
         contractAddresses[4] = ContractAddress(
             Contract.DIAMOND_LOUPE_FACET,
-            address(pantosFacets.dLoupe)
+            address(visionFacets.dLoupe)
         );
         contractAddresses[5] = ContractAddress(
             Contract.REGISTRY_FACET,
-            address(pantosFacets.registry)
+            address(visionFacets.registry)
         );
         contractAddresses[6] = ContractAddress(
             Contract.TRANSFER_FACET,
-            address(pantosFacets.transfer)
+            address(visionFacets.transfer)
         );
         contractAddresses[7] = ContractAddress(
             Contract.FORWARDER,
-            address(pantosForwarder)
+            address(visionForwarder)
         );
         contractAddresses[8] = ContractAddress(
-            Contract.PAN,
-            address(pantosToken)
+            Contract.VSN,
+            address(visionToken)
         );
         contractAddresses[9] = ContractAddress(
             Contract.BEST,
             address(bitpandaEcosystemToken)
         );
-        for (uint i; i < pantosWrappers.length; i++) {
+        for (uint i; i < visionWrappers.length; i++) {
             contractAddresses[i + 10] = ContractAddress(
-                _keysToContracts[pantosWrappers[i].symbol()],
-                address(pantosWrappers[i])
+                _keysToContracts[visionWrappers[i].symbol()],
+                address(visionWrappers[i])
             );
         }
         if (isMigratorIncludedInExport) {
             contractAddresses[length - 1] = ContractAddress(
-                Contract.PAN_MIGRATOR,
-                address(pantosTokenMigrator)
+                Contract.VSN_MIGRATOR,
+                address(visionTokenMigrator)
             );
         }
         exportContractAddresses(contractAddresses, false);
@@ -237,54 +237,54 @@ contract DeployContracts is
         accessController = AccessController(
             getContractAddress(Contract.ACCESS_CONTROLLER, false)
         );
-        pantosHubProxy = PantosHubProxy(
+        visionHubProxy = VisionHubProxy(
             payable(getContractAddress(Contract.HUB_PROXY, false))
         );
-        pantosHubInit = PantosHubInit(
+        visionHubInit = VisionHubInit(
             getContractAddress(Contract.HUB_INIT, false)
         );
-        pantosFacets = PantosFacets(
+        visionFacets = VisionFacets(
             DiamondCutFacet(
                 getContractAddress(Contract.DIAMOND_CUT_FACET, false)
             ),
             DiamondLoupeFacet(
                 getContractAddress(Contract.DIAMOND_LOUPE_FACET, false)
             ),
-            PantosRegistryFacet(
+            VisionRegistryFacet(
                 getContractAddress(Contract.REGISTRY_FACET, false)
             ),
-            PantosTransferFacet(
+            VisionTransferFacet(
                 getContractAddress(Contract.TRANSFER_FACET, false)
             )
         );
-        pantosForwarder = PantosForwarder(
+        visionForwarder = VisionForwarder(
             getContractAddress(Contract.FORWARDER, false)
         );
-        pantosToken = PantosToken(getContractAddress(Contract.PAN, false));
+        visionToken = VisionToken(getContractAddress(Contract.VSN, false));
         bitpandaEcosystemToken = BitpandaEcosystemToken(
             getContractAddress(Contract.BEST, false)
         );
-        pantosWrappers = new PantosWrapper[](7);
-        pantosWrappers[0] = PantosWrapper(
-            getContractAddress(Contract.PAN_AVAX, false)
+        visionWrappers = new VisionWrapper[](7);
+        visionWrappers[0] = VisionWrapper(
+            getContractAddress(Contract.VSN_AVAX, false)
         );
-        pantosWrappers[1] = PantosWrapper(
-            getContractAddress(Contract.PAN_BNB, false)
+        visionWrappers[1] = VisionWrapper(
+            getContractAddress(Contract.VSN_BNB, false)
         );
-        pantosWrappers[2] = PantosWrapper(
-            getContractAddress(Contract.PAN_CELO, false)
+        visionWrappers[2] = VisionWrapper(
+            getContractAddress(Contract.VSN_CELO, false)
         );
-        pantosWrappers[3] = PantosWrapper(
-            getContractAddress(Contract.PAN_CRO, false)
+        visionWrappers[3] = VisionWrapper(
+            getContractAddress(Contract.VSN_CRO, false)
         );
-        pantosWrappers[4] = PantosWrapper(
-            getContractAddress(Contract.PAN_ETH, false)
+        visionWrappers[4] = VisionWrapper(
+            getContractAddress(Contract.VSN_ETH, false)
         );
-        pantosWrappers[5] = PantosWrapper(
-            getContractAddress(Contract.PAN_S, false)
+        visionWrappers[5] = VisionWrapper(
+            getContractAddress(Contract.VSN_S, false)
         );
-        pantosWrappers[6] = PantosWrapper(
-            getContractAddress(Contract.PAN_POL, false)
+        visionWrappers[6] = VisionWrapper(
+            getContractAddress(Contract.VSN_POL, false)
         );
     }
 
@@ -294,9 +294,9 @@ contract DeployContracts is
         accessController = AccessController(
             getContractAddress(Contract.ACCESS_CONTROLLER, false)
         );
-        pantosToken = PantosToken(getContractAddress(Contract.PAN, false));
-        pantosTokenMigrator = PantosTokenMigrator(
-            getContractAddress(Contract.PAN_MIGRATOR, false)
+        visionToken = VisionToken(getContractAddress(Contract.VSN, false));
+        visionTokenMigrator = VisionTokenMigrator(
+            getContractAddress(Contract.VSN_MIGRATOR, false)
         );
     }
 }

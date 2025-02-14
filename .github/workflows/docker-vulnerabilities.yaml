@@ -11,6 +11,7 @@ jobs:
 
         steps:
             - uses: step-security/harden-runner@v2
+              if: ${{ github.event.repository.visibility == 'public' }}
               with:
                disable-sudo: false
                egress-policy: audit
@@ -39,14 +40,14 @@ jobs:
             - name: Scan vulnerabilities ethereum node image
               uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.29.0
               with:           
-                image-ref: 'pantosio/ethereum-node:analysis-latest'
+                image-ref: 'visionio/ethereum-node:analysis-latest'
                 format: 'sarif'
-                output: 'trivy-pantos-ethereum-node-results.sarif'
+                output: 'trivy-vision-ethereum-node-results.sarif'
                 severity: 'CRITICAL,HIGH'
             
             - name: Upload Trivy scan results for ethereum node to GitHub Security tab
               uses: github/codeql-action/upload-sarif@v3
               if: always()
               with:
-                category: 'pantos-ethereum-node'
-                sarif_file: 'trivy-pantos-ethereum-node-results.sarif'
+                category: 'vision-ethereum-node'
+                sarif_file: 'trivy-vision-ethereum-node-results.sarif'
