@@ -56,7 +56,7 @@ services:
           target: /root/docker-compose.yml
   bnb:
     restart: always
-    image: vision/ethereum-node:${DOCKER_TAG-local}
+    image: visionweb3foundation/ethereum-node:${DOCKER_TAG-local}
     build:
       context: .
       dockerfile: Dockerfile
