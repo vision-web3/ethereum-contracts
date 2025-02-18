@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - main
-  # temporal comment to force release
-  pull_request: 
 
 jobs:
   publish-docker:
