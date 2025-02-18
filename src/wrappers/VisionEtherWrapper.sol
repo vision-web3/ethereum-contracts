@@ -11,7 +11,7 @@ import {VisionCoinWrapper} from "../VisionCoinWrapper.sol";
 contract VisionEtherWrapper is VisionCoinWrapper {
     string private constant _NAME = "Ether (Vision)";
 
-    string private constant _SYMBOL = "panETH";
+    string private constant _SYMBOL = "vsnETH";
 
     uint8 private constant _DECIMALS = 18;
 

@@ -11,7 +11,7 @@ import {VisionCoinWrapper} from "../VisionCoinWrapper.sol";
 contract VisionCeloWrapper is VisionCoinWrapper {
     string private constant _NAME = "Celo (Vision)";
 
-    string private constant _SYMBOL = "panCELO";
+    string private constant _SYMBOL = "vsnCELO";
 
     uint8 private constant _DECIMALS = 18;
 
