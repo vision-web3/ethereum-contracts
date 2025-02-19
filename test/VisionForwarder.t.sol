@@ -14,6 +14,7 @@ import {VisionBaseToken} from "../src/VisionBaseToken.sol";
 import {AccessController} from "../src/access/AccessController.sol";
 
 import {VisionBaseTest} from "./VisionBaseTest.t.sol";
+import {GasDrainingContract} from "./helpers/GasDrainingContract.sol";
 
 contract VisionForwarderTest is VisionBaseTest {
     address public constant VISION_HUB_ADDRESS =
@@ -593,10 +594,23 @@ contract VisionForwarderTest is VisionBaseTest {
         external
         parameterizedTest(validatorCounts)
     {
+        GasDrainingContract gasDrainingContract = new GasDrainingContract(
+            1000,
+            address(accessController)
+        );
         initializeVisionForwarder();
         VisionTypes.TransferRequest memory request = transferRequest();
+
+        vm.startPrank(SUPER_CRITICAL_OPS);
+        gasDrainingContract.setVisionForwarder(address(visionForwarder));
+        gasDrainingContract.unpause();
+        gasDrainingContract.transfer(request.sender, request.amount);
+        vm.stopPrank();
+        request.token = address(gasDrainingContract);
+
         bytes32 digest = getDigest(request);
         bytes memory signature = sign(testWallet, digest);
+
         setupMockAndExpectFor_verifyAndForwardTransferLight(request);
         vm.prank(VISION_HUB_ADDRESS);
         vm.expectRevert(
@@ -606,7 +620,7 @@ contract VisionForwarderTest is VisionBaseTest {
         bool succeeded;
         bytes32 tokenData;
         (succeeded, tokenData) = visionForwarder.verifyAndForwardTransfer{
-            gas: 60000
+            gas: 116049
         }(request, signature);
 
         assertFalse(succeeded);
@@ -814,8 +828,21 @@ contract VisionForwarderTest is VisionBaseTest {
         external
         parameterizedTest(validatorCounts)
     {
+        GasDrainingContract gasDrainingContract = new GasDrainingContract(
+            1000,
+            address(accessController)
+        );
         initializeVisionForwarder();
         VisionTypes.TransferFromRequest memory request = transferFromRequest();
+
+        vm.startPrank(SUPER_CRITICAL_OPS);
+        gasDrainingContract.setVisionForwarder(address(visionForwarder));
+        gasDrainingContract.unpause();
+        gasDrainingContract.transfer(request.sender, request.amount);
+        vm.stopPrank();
+
+        request.sourceToken = address(gasDrainingContract);
+
         bytes32 digest = getDigest(request);
         bytes memory signature = sign(testWallet, digest);
         uint256 sourceBlockchainFactor = 2;
@@ -835,7 +862,7 @@ contract VisionForwarderTest is VisionBaseTest {
         bytes32 sourceTokenData;
 
         (succeeded, sourceTokenData) = visionForwarder
-            .verifyAndForwardTransferFrom{gas: 60000}(
+            .verifyAndForwardTransferFrom{gas: 97000}(
             sourceBlockchainFactor,
             destinationBlockchainFactor,
             request,

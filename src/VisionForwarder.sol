@@ -283,10 +283,6 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
         // transfer fails to ensure that the service node gets paid
         bool succeeded;
         bytes memory tokenData;
-        require(
-            gasleft() * 63 >= 64 * PANDAS_TOKEN_TRANSFER_GAS,
-            "VisionForwarder: Not enough gas for `visionTransfer` call provided"
-        );
         (succeeded, tokenData) = request.token.excessivelySafeCall(
             PANDAS_TOKEN_TRANSFER_GAS,
             0,
@@ -297,6 +293,12 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
                 request.recipient,
                 request.amount
             )
+        );
+        // check if the service node provided enough gas
+        // (>= PANDAS_TOKEN_TRANSFER_GAS ) or if the contract is malicious
+        require(
+            gasleft() >= PANDAS_TOKEN_TRANSFER_GAS / 63,
+            "VisionForwarder: Not enough gas for `visionTransfer` call provided"
         );
         return (succeeded, bytes32(tokenData));
     }
@@ -333,10 +335,6 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
         // transfer fails to ensure that the service node gets paid
         bool succeeded;
         bytes memory sourceTokenData;
-        require(
-            gasleft() * 63 >= 64 * PANDAS_TOKEN_TRANSFER_GAS,
-            "VisionForwarder: Not enough gas for `visionTransferFrom` call provided"
-        );
         (succeeded, sourceTokenData) = request.sourceToken.excessivelySafeCall(
             PANDAS_TOKEN_TRANSFER_FROM_GAS,
             0,
@@ -346,6 +344,12 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
                 request.sender,
                 request.amount
             )
+        );
+        // check if the service node provided enough gas
+        // (>= PANDAS_TOKEN_TRANSFER_FROM_GAS ) or if the contract is malicious
+        require(
+            gasleft() >= PANDAS_TOKEN_TRANSFER_FROM_GAS / 63,
+            "VisionForwarder: Not enough gas for `visionTransferFrom` call provided"
         );
         // Transfer the fee to the primary validator node
         if (succeeded) {
