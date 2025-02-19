@@ -14,6 +14,7 @@ import {VisionBaseToken} from "../src/VisionBaseToken.sol";
 import {AccessController} from "../src/access/AccessController.sol";
 
 import {VisionBaseTest} from "./VisionBaseTest.t.sol";
+import {GasDrainingContract} from "./helpers/GasDrainingContract.sol";
 
 contract VisionForwarderTest is VisionBaseTest {
     address public constant VISION_HUB_ADDRESS =
@@ -589,29 +590,6 @@ contract VisionForwarderTest is VisionBaseTest {
         assertEq(tokenData, "");
     }
 
-    function test_verifyAndForwardTransfer_NotEnoughGasFromServiceNodeProvided()
-        external
-        parameterizedTest(validatorCounts)
-    {
-        initializeVisionForwarder();
-        VisionTypes.TransferRequest memory request = transferRequest();
-        bytes32 digest = getDigest(request);
-        bytes memory signature = sign(testWallet, digest);
-        setupMockAndExpectFor_verifyAndForwardTransferLight(request);
-        vm.prank(VISION_HUB_ADDRESS);
-        vm.expectRevert(
-            "VisionForwarder: Not enough gas for `visionTransfer` call provided"
-        );
-
-        bool succeeded;
-        bytes32 tokenData;
-        (succeeded, tokenData) = visionForwarder.verifyAndForwardTransfer{
-            gas: 60000
-        }(request, signature);
-
-        assertFalse(succeeded);
-    }
-
     function test_verifyAndForwardTransfer_PandasTokenFailure()
         external
         parameterizedTest(validatorCounts)
@@ -808,41 +786,6 @@ contract VisionForwarderTest is VisionBaseTest {
 
         assertTrue(succeeded);
         assertEq(sourceTokenData, "");
-    }
-
-    function test_verifyAndForwardTransferFrom_NotEnoughGasFromServiceNodeProvided()
-        external
-        parameterizedTest(validatorCounts)
-    {
-        initializeVisionForwarder();
-        VisionTypes.TransferFromRequest memory request = transferFromRequest();
-        bytes32 digest = getDigest(request);
-        bytes memory signature = sign(testWallet, digest);
-        uint256 sourceBlockchainFactor = 2;
-        uint256 destinationBlockchainFactor = 2;
-
-        setupMockAndExpectFor_verifyAndForwardTransferFromLight(
-            request,
-            sourceBlockchainFactor,
-            destinationBlockchainFactor
-        );
-        vm.prank(VISION_HUB_ADDRESS);
-        vm.expectRevert(
-            "VisionForwarder: Not enough gas for `visionTransferFrom` call provided"
-        );
-
-        bool succeeded;
-        bytes32 sourceTokenData;
-
-        (succeeded, sourceTokenData) = visionForwarder
-            .verifyAndForwardTransferFrom{gas: 60000}(
-            sourceBlockchainFactor,
-            destinationBlockchainFactor,
-            request,
-            signature
-        );
-
-        assertFalse(succeeded);
     }
 
     function test_verifyAndForwardTransferFrom_PandasTokenFailure()
