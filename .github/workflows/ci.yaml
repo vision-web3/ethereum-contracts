@@ -200,3 +200,4 @@ jobs:
         with:
           ethereum-contracts-path: ${{ env.VISION_ETHEREUM_CONTRACTS }}
           ethereum-contracts-version: 'local'
+          token: ${{ secrets.GITHUB_TOKEN }}
