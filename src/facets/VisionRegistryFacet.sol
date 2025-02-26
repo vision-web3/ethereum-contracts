@@ -469,8 +469,11 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
             "VisionHub: blockchain of external token must be active"
         );
         require(
-            bytes(externalToken).length > 0,
-            "VisionHub: external token address must not be empty"
+            bytes(externalToken).length == 42 &&
+                bytes(externalToken)[0] == bytes1("0") &&
+                (bytes(externalToken)[1] == bytes1("x") ||
+                    bytes(externalToken)[1] == bytes1("X")),
+            "VisionHub: external token address must not be empty or more than 22 bytes with leading 0x"
         );
         // Validate the stored token data
         VisionTypes.TokenRecord storage tokenRecord = s.tokenRecords[token];

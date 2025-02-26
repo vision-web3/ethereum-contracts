@@ -79,7 +79,8 @@ abstract contract VisionBaseTest is Test {
     string constant SERVICE_NODE_URL = "service node url";
     string constant SERVICE_NODE_URL_1 = "https://servicenode1.vision.io";
     string constant SERVICE_NODE_URL_2 = "https://servicenode2.vision.io";
-    string constant EXTERNAL_PANDAS_TOKEN_ADDRESS = "external token address";
+    string constant EXTERNAL_PANDAS_TOKEN_ADDRESS =
+        "0x00112233445566778899AABBCCDDEEFF00112233";
     string constant OTHER_BLOCKCHAIN_TRANSACTION_ID =
         "other blockchain transaction ID";
     uint256 constant OTHER_BLOCKCHAIN_TRANSFER_ID = 0;
