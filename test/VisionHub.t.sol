@@ -1393,7 +1393,6 @@ contract VisionHubTest is VisionHubDeployer {
             uint256(otherBlockchain.blockchainId),
             EXTERNAL_PANDAS_TOKEN_ADDRESS
         );
-
         VisionTypes.ExternalTokenRecord
             memory externalTokenRecord = visionHubProxy.getExternalTokenRecord(
                 PANDAS_TOKEN_ADDRESS,
@@ -1493,12 +1492,53 @@ contract VisionHubTest is VisionHubDeployer {
 
     function test_registerExternalToken_WithEmptyAddress() external {
         initializeVisionHub();
-        vm.expectRevert("VisionHub: external token address must not be empty");
+        vm.expectRevert(
+            "VisionHub: external token address must not be empty or more than 22 bytes with leading 0x"
+        );
 
         visionHubProxy.registerExternalToken(
             PANDAS_TOKEN_ADDRESS,
             uint256(otherBlockchain.blockchainId),
             ""
+        );
+    }
+
+    function test_registerExternalToken_WithShortAddress() external {
+        initializeVisionHub();
+        vm.expectRevert(
+            "VisionHub: external token address must not be empty or more than 22 bytes with leading 0x"
+        );
+
+        visionHubProxy.registerExternalToken(
+            PANDAS_TOKEN_ADDRESS,
+            uint256(otherBlockchain.blockchainId),
+            "00112233445566778899"
+        );
+    }
+
+    function test_registerExternalToken_WithLongAddress() external {
+        initializeVisionHub();
+        vm.expectRevert(
+            "VisionHub: external token address must not be empty or more than 22 bytes with leading 0x"
+        );
+
+        visionHubProxy.registerExternalToken(
+            PANDAS_TOKEN_ADDRESS,
+            uint256(otherBlockchain.blockchainId),
+            "001122334455667788990011223344556677889900112233445566778899"
+        );
+    }
+
+    function test_registerExternalToken_NoLeading0X() external {
+        initializeVisionHub();
+        vm.expectRevert(
+            "VisionHub: external token address must not be empty or more than 22 bytes with leading 0x"
+        );
+
+        visionHubProxy.registerExternalToken(
+            PANDAS_TOKEN_ADDRESS,
+            uint256(otherBlockchain.blockchainId),
+            "0A0000000000000000000000000000000000000000"
         );
     }
 
