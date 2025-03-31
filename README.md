@@ -1,6 +1,6 @@
-<img src="https://raw.githubusercontent.com/vision-web3-foundation/ethereum-contracts/img/vision-logo-full.svg" alt="Vision logo" align="right" width="120" />
+<img src="https://raw.githubusercontent.com/vision-web3/ethereum-contracts/img/vision-logo-full.svg" alt="Vision logo" align="right" width="120" />
 
-[![CI](https://github.com/vision-web3-foundation/ethereum-contracts/actions/workflows/ci.yaml/badge.svg)](https://github.com/vision-web3-foundation/ethereum-contracts/actions/workflows/ci.yaml) 
+[![CI](https://github.com/vision-web3/ethereum-contracts/actions/workflows/ci.yaml/badge.svg)](https://github.com/vision-web3/ethereum-contracts/actions/workflows/ci.yaml) 
 
 # Vision on-chain components for Ethereum and compatible blockchains
 

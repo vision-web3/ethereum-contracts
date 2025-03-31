@@ -40,7 +40,7 @@ jobs:
             - name: Scan vulnerabilities ethereum node image
               uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.29.0
               with:           
-                image-ref: 'visionweb3foundation/ethereum-node:analysis-latest'
+                image-ref: 'vsnw3/ethereum-node:analysis-latest'
                 format: 'sarif'
                 output: 'trivy-vision-ethereum-node-results.sarif'
                 severity: 'CRITICAL,HIGH'

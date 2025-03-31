@@ -7,7 +7,7 @@ on:
 jobs:
   publish-docker:
     uses: ./.github/workflows/publish-docker.yaml
-    if: github.repository == 'vision-web3-foundation/ethereum-contracts'
+    if: github.repository == 'vision-web3/ethereum-contracts'
     secrets: 'inherit'
     with:
       tag: development
@@ -17,4 +17,4 @@ jobs:
 
   test:
     needs: publish-docker
-    uses: vision-web3-foundation/e2e-testing/.github/workflows/ci.yaml@main
+    uses: vision-web3/e2e-testing/.github/workflows/ci.yaml@main
