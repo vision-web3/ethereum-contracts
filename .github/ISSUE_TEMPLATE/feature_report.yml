@@ -1,7 +1,7 @@
 name: Feature Request
 description: You want a new feature to be implemented.
 labels: [wishlisted]
-projects: ["vision-web3-foundation/1"]
+projects: ["vision-web3/1"]
 body:
   - type: markdown
     attributes:

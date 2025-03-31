@@ -23,7 +23,7 @@ jobs:
       - name: Checkout GitBook Repository
         uses: actions/checkout@v4
         with:
-          repository: vision-web3-foundation/docs
+          repository: vision-web3/docs
           path: ./vision-docs
           token: ${{ secrets.GH_TOKEN }}
 
