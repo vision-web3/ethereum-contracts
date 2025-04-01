@@ -13,7 +13,7 @@ currently being supported with security updates.
 
 The vision project values the independent security research community and believes that responsible disclosure of security vulnerabilities helps us ensure the security and privacy of all our users.
 
-Please do NOT raise a GitHub Issue to report a security vulnerability. If you believe you have found a security vulnerability, please submit a report to [contact@vision.io](contact@vision.io) clearly indicating [SecurityVulnerability] in the subject. We would preferably expect a proof of concept. 
+Please do NOT raise a GitHub Issue to report a security vulnerability. If you believe you have found a security vulnerability, please submit a report to [contact@XXX](contact@XXX) clearly indicating [SecurityVulnerability] in the subject. We would preferably expect a proof of concept. 
 
 We ask that you do not use other channels or contact the project maintainers directly.
 
