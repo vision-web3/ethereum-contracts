@@ -2,7 +2,7 @@
 // slither-disable-next-line solc-version
 pragma solidity 0.8.26;
 
-import {IVisionToken} from "./IVisionToken.sol";
+import {IVisionToken} from "./IVisionToken.old.sol";
 
 /**
  * @title Common interface for Vision-compatible token contracts that

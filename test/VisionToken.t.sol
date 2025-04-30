@@ -9,7 +9,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import {ERC20Pausable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 
-import {IVisionToken} from "../src/interfaces/IVisionToken.sol";
+import {IVisionToken} from "../src/interfaces/IVisionToken.old.sol";
 import {VisionBaseToken} from "../src/VisionBaseToken.sol";
 import {VisionToken} from "../src/VisionToken.sol";
 

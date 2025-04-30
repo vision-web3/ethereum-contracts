@@ -6,7 +6,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {VisionTypes} from "../interfaces/VisionTypes.sol";
 import {IVisionForwarder} from "../interfaces/IVisionForwarder.sol";
-import {IVisionToken} from "../interfaces/IVisionToken.sol";
+import {IVisionToken} from "../interfaces/IVisionToken.old.sol";
 import {IVisionTransfer} from "../interfaces/IVisionTransfer.sol";
 
 import {VisionBaseFacet} from "./VisionBaseFacet.sol";

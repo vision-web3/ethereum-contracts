@@ -5,7 +5,7 @@ pragma solidity 0.8.26;
 import {VisionRoles} from "../access/VisionRoles.sol";
 import {VisionTypes} from "../interfaces/VisionTypes.sol";
 import {IVisionForwarder} from "../interfaces/IVisionForwarder.sol";
-import {IVisionToken} from "../interfaces/IVisionToken.sol";
+import {IVisionToken} from "../interfaces/IVisionToken.old.sol";
 import {IVisionRegistry} from "../interfaces/IVisionRegistry.sol";
 
 import {VisionBaseFacet} from "./VisionBaseFacet.sol";

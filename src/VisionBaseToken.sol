@@ -8,7 +8,7 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 import {IBEP20} from "./interfaces/IBEP20.sol";
-import {IVisionToken} from "./interfaces/IVisionToken.sol";
+import {IVisionToken} from "./interfaces/IVisionToken.old.sol";
 
 /**
  * @title Vision base token

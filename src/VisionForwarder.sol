@@ -13,7 +13,7 @@ import {VisionRoles} from "./access/VisionRoles.sol";
 import {VisionTypes} from "./interfaces/VisionTypes.sol";
 import {IVisionForwarder} from "./interfaces/IVisionForwarder.sol";
 import {IVisionHub} from "./interfaces/IVisionHub.sol";
-import {IVisionToken} from "./interfaces/IVisionToken.sol";
+import {IVisionToken} from "./interfaces/IVisionToken.old.sol";
 
 uint256 constant DEFAULT_MINIMUM_VALIDATOR_NODE_SIGNATURES = 3;
 uint constant INVALID_VALIDATOR_NODE_INDEX = type(uint).max;
