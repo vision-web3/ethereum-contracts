@@ -2,12 +2,10 @@
 // slither-disable-next-line solc-version
 pragma solidity 0.8.26;
 
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Pausable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {VisionBaseToken} from "./VisionBaseToken.sol";
 
 /**
@@ -18,19 +16,18 @@ import {VisionBaseToken} from "./VisionBaseToken.sol";
  * - Uses AccessControl for role-based permissions (e.g., pausing, upgrading, minting).
  * - The `CRITICAL_OPS` role is managed using AccessControl, which allows multiple accounts to hold this role.
  * - However, the implementation assumes only one account will hold the `CRITICAL_OPS` role at a time,
- *  in alignment with the `Ownable` nature of the base contract.
+ *   in alignment with the `Ownable` nature of the base contract.
  * - The account with the `CRITICAL_OPS` role must also be the contract owner, as enforced by the `Ownable` contract.
  * - Changing the `CRITICAL_OPS` address requires both `grantRole`/`revokeRole` and `transferOwnership`.
- */ contract VisionToken is VisionBaseToken, ERC20Pausable, AccessControl {
+ */
+contract VisionToken is VisionBaseToken, ERC20Pausable, AccessControl {
     string private constant _NAME = "Vision";
-
     string private constant _SYMBOL = "VSN";
-
-    uint8 private constant _DECIMALS = 8;
+    uint8 private constant _DECIMALS = 18;
 
     /// @notice Role for critical ops on contract.
     bytes32 internal constant CRITICAL_OPS = keccak256("CRITICAL_OPS");
-    /// @notice Role for minting and burning tokens.
+    /// @notice Role for minting tokens.
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     /// @notice Role for pausing the contract.
     bytes32 internal constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -72,13 +69,13 @@ import {VisionBaseToken} from "./VisionBaseToken.sol";
     function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
         require(amount != 0, "VisionToken: Mint amount is zero");
         _mint(to, amount);
-        emit Mint(_msgSender(), to, amount);
+        emit Mint(msg.sender, to, amount);
     }
 
     /**
      * @dev See {VisionBaseToken-onlyVisionForwarder}
      */
-    modifier onlyVisionForwarder() override {
+    modifier onlyVisionForwarder() virtual override {
         require(
             msg.sender == getVisionForwarder(),
             "VisionToken: caller is not the VisionForwarder"
@@ -155,14 +152,6 @@ import {VisionBaseToken} from "./VisionBaseToken.sol";
         return VisionBaseToken.name();
     }
 
-    // FIXME dopcument
-    // /**
-    //  * @dev Disable the transfer of ownership.
-    //  */
-    // function transferOwnership(address) public view override onlyOwner {
-    //     require(false, "VisionToken: ownership cannot be transferred");
-    // }
-
     /**
      * @dev See {IERC165-supportsInterface}
      */
@@ -172,12 +161,12 @@ import {VisionBaseToken} from "./VisionBaseToken.sol";
         public
         view
         virtual
-        override(AccessControl, VisionBaseToken)
+        override(VisionBaseToken, AccessControl)
         returns (bool)
     {
         return
-            AccessControl.supportsInterface(interfaceId) ||
-            VisionBaseToken.supportsInterface(interfaceId);
+            VisionBaseToken.supportsInterface(interfaceId) ||
+            AccessControl.supportsInterface(interfaceId);
     }
 
     /**

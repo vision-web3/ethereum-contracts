@@ -3,8 +3,9 @@
 pragma solidity 0.8.26;
 
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+// solhint-disable-next-line max-line-length
 import {ERC20PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
+import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {VisionBaseTokenUpgradeable} from "./VisionBaseTokenUpgradeable.sol";
@@ -13,7 +14,7 @@ import {VisionBaseTokenUpgradeable} from "./VisionBaseTokenUpgradeable.sol";
  * @title VisionToken
  * @notice Upgradeable ERC20 token with role-based access control, pausing, and permit support.
  * @dev
- * - Inherits core ERC20 logic and `Ownable` from VisionBaseTokenUpgradeable.
+ * - Inherits core upgradable variant of ERC20 logic and `Ownable` from VisionBaseTokenUpgradeable.
  * - Uses AccessControlUpgradeable for role-based permissions (e.g., pausing, upgrading, minting).
  * - The `CRITICAL_OPS` role is managed using AccessControl, which allows multiple accounts to hold this role.
  * - However, the implementation assumes only one account will hold the `CRITICAL_OPS` role at a time,
@@ -28,9 +29,7 @@ contract VisionToken is
     UUPSUpgradeable
 {
     string private constant _NAME = "Vision";
-
     string private constant _SYMBOL = "VSN";
-
     uint8 private constant _DECIMALS = 18;
 
     /// @notice Role for critical ops on contract.
@@ -54,7 +53,7 @@ contract VisionToken is
     }
 
     /**
-     * @dev criticalOps receives all existing tokens and is the owner of underlying VisionBaseToken
+     * @dev criticalOps receives all existing tokens and is the owner of underlying VisionBaseTokenUpgradeable
      */
     function initialize(
         uint256 initialSupply,
@@ -64,8 +63,8 @@ contract VisionToken is
         address pauser,
         address upgrader
     ) public initializer {
-        // __VisionBaseToken_init() also initializes Upgradeable variants of ERC165, Ownable, ERC20, ERC20Permit 
-        __VisionBaseToken_init(_NAME, _SYMBOL, _DECIMALS, criticalOps);
+        // initializeVisionBaseToken() also initializes Upgradeable variants of ERC165, Ownable, ERC20, ERC20Permit
+        initializeVisionBaseToken(_NAME, _SYMBOL, _DECIMALS, criticalOps);
         __ERC20Pausable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -86,7 +85,7 @@ contract VisionToken is
      * @dev Only callable by accounts with the `MINTER_ROLE`.
      * Emits a {Mint} event with `minter` set to the address that initiated the minting,
      * `to` set to the recipient's address, and `amount` set to the amount of tokens minted.
-     * Reverts with "VisionToken: Mint amount is zero" if `amount` is zero.
+     * Reverts if `amount` is zero.
      * Requirement: the contract must not be paused. {ERC20PausableUpgradeable-_update} enforces it.
      * @param to The address to receive the minted tokens.
      * @param amount The amount of tokens to mint.
@@ -94,13 +93,13 @@ contract VisionToken is
     function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
         require(amount != 0, "VisionToken: Mint amount is zero");
         _mint(to, amount);
-        emit Mint(_msgSender(), to, amount);
+        emit Mint(msg.sender, to, amount);
     }
 
     /**
-     * @dev See {VisionBaseToken-onlyVisionForwarder}
+     * @dev See {VisionBaseTokenUpgradeable-onlyVisionForwarder}
      */
-    modifier onlyVisionForwarder() override {
+    modifier onlyVisionForwarder() virtual override {
         require(
             msg.sender == getVisionForwarder(),
             "VisionToken: caller is not the VisionForwarder"
@@ -109,14 +108,20 @@ contract VisionToken is
     }
 
     /**
-     * @dev See {Pausable-_pause)
+     * @notice Pauses the Token contract.
+     * @dev Only callable by accounts with the `PAUSER_ROLE`
+     * and only if the contract is not paused.
+     * Requirements the contract must not be paused.
      */
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
     /**
-     * @dev See {Pausable-_unpause)
+     * @notice Unpauses the Token contract.
+     * @dev Only callable by accounts with the `CRITICAL_OPS`
+     * and only if the contract is paused.
+     * Requirement: the contract must be paused.
      */
     function unpause() external onlyRole(CRITICAL_OPS) {
         require(
@@ -127,7 +132,7 @@ contract VisionToken is
     }
 
     /**
-     *  @dev See {VisionBaseToken-_setVisionForwarder}
+     *  @dev See {VisionBaseTokenUpgradeable-_setVisionForwarder}
      */
     function setVisionForwarder(
         address visionForwarder
@@ -136,19 +141,19 @@ contract VisionToken is
     }
 
     /**
-     * @dev See {VisionBaseToken-decimals} and {ERC20-decimals}.
+     * @dev See {VisionBaseTokenUpgradeable-decimals}.
      */
     function decimals()
         public
         view
-        override(ERC20Upgradeable, VisionBaseTokenUpgradeable)
+        override(VisionBaseTokenUpgradeable, ERC20Upgradeable)
         returns (uint8)
     {
         return VisionBaseTokenUpgradeable.decimals();
     }
 
     /**
-     * @dev See {VisionBaseToken-symbol} and {ERC20-symbol}.
+     * @dev See {VisionBaseTokenUpgradeable-symbol} and {ERC20-symbol}.
      */
     function symbol()
         public
@@ -160,7 +165,7 @@ contract VisionToken is
     }
 
     /**
-     * @dev See {VisionBaseToken-name} and {ERC20-name}.
+     * @dev See {VisionBaseTokenUpgradeable-name} and {ERC20-name}.
      */
     function name()
         public
@@ -180,16 +185,16 @@ contract VisionToken is
         public
         view
         virtual
-        override(AccessControlUpgradeable, VisionBaseTokenUpgradeable)
+        override(VisionBaseTokenUpgradeable, AccessControlUpgradeable)
         returns (bool)
     {
         return
-            AccessControlUpgradeable.supportsInterface(interfaceId) ||
-            VisionBaseTokenUpgradeable.supportsInterface(interfaceId);
+            VisionBaseTokenUpgradeable.supportsInterface(interfaceId) ||
+            AccessControlUpgradeable.supportsInterface(interfaceId);
     }
 
     /**
-     * @dev See {ERC20-_update}.
+     * @dev See {ERC20Upgradeable-_update}.
      */
     function _update(
         address sender,

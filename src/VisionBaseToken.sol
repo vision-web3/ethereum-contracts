@@ -89,7 +89,7 @@ abstract contract VisionBaseToken is
     }
 
     /**
-     * @dev See {IBEP20-decimals} and {ERC20-decimals}
+     * @dev Returns the decimals places of the token.
      */
     function decimals()
         public
@@ -102,7 +102,7 @@ abstract contract VisionBaseToken is
     }
 
     /**
-     * @dev See {IBEP20-symbol} and {ERC20-symbol}
+     * @dev See {ERC20-symbol}
      */
     function symbol()
         public
@@ -115,7 +115,7 @@ abstract contract VisionBaseToken is
     }
 
     /**
-     * @dev See {IBEP20-name} and {ERC20-name}
+     * @dev See {ERC20-name}
      */
     function name()
         public
@@ -143,7 +143,7 @@ abstract contract VisionBaseToken is
     }
 
     /**
-     * @dev See {IBEP20-getOwner} and {Ownable-owner}
+     * @dev See {IVisionToken-getOwner}
      */
     function getOwner() public view virtual override returns (address) {
         return owner();
@@ -167,11 +167,9 @@ abstract contract VisionBaseToken is
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC165, IERC165) returns (bool) {
+    ) public view virtual override(IERC165, ERC165) returns (bool) {
         return
             interfaceId == type(IVisionToken).interfaceId ||
-            interfaceId == type(IERC20).interfaceId ||
-            interfaceId == type(Ownable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 

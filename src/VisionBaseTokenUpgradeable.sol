@@ -7,11 +7,11 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+// solhint-disable-next-line max-line-length
 import {ERC20PermitUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import {IBEP20} from "./interfaces/IBEP20.sol";
 import {IVisionToken} from "./interfaces/IVisionToken.sol";
 
 /**
@@ -50,7 +50,7 @@ abstract contract VisionBaseTokenUpgradeable is
         _disableInitializers();
     }
 
-    function __VisionBaseToken_init(
+    function initializeVisionBaseToken(
         string memory name_,
         string memory symbol_,
         uint8 decimals_,
@@ -60,10 +60,10 @@ abstract contract VisionBaseTokenUpgradeable is
         __Ownable_init(owner_);
         __ERC20_init(name_, symbol_);
         __ERC20Permit_init(name_);
-        __VisionBaseToken_init_unchained(decimals_);
+        initializeVisionBaseTokenUnchained(decimals_);
     }
 
-    function __VisionBaseToken_init_unchained(
+    function initializeVisionBaseTokenUnchained(
         uint8 decimals_
     ) internal onlyInitializing {
         VisionBaseTokenStorage storage vs = _getVisionBaseTokenStorage();
@@ -174,7 +174,7 @@ abstract contract VisionBaseTokenUpgradeable is
     }
 
     /**
-     * See {IERC20Permit}
+     * See {IERC20Permit-nonces}
      */
     function nonces(
         address owner
@@ -189,7 +189,7 @@ abstract contract VisionBaseTokenUpgradeable is
     }
 
     /**
-     * @dev See {IVisionToken-owner}
+     * @dev See {IVisionToken-getOwner}
      */
     function getOwner() public view virtual override returns (address) {
         return owner();
@@ -214,7 +214,7 @@ abstract contract VisionBaseTokenUpgradeable is
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC165Upgradeable, IERC165) returns (bool) {
+    ) public view virtual override(IERC165, ERC165Upgradeable) returns (bool) {
         return
             interfaceId == type(IVisionToken).interfaceId ||
             super.supportsInterface(interfaceId);
