@@ -18,7 +18,10 @@ abstract contract VisionTokenDeployer is VisionBaseScript {
     ) public returns (VisionToken) {
         VisionToken visionToken = new VisionToken(
             initialSupply,
-            address(accessController)
+            address(0), // FIXME
+            address(0),
+            address(0),
+            address(0)
         );
         console2.log(
             "%s deployed; paused=%s; address=%s",

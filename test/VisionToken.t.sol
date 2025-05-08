@@ -210,7 +210,15 @@ contract VisionTokenHarness is VisionToken {
     constructor(
         uint256 initialSupply,
         address accessController
-    ) VisionToken(initialSupply, accessController) {}
+    )
+        VisionToken(
+            initialSupply,
+            address(0),
+            address(0),
+            address(0),
+            address(0)
+        )
+    {}
 
     function exposed_unsetVisionForwarder() external {
         _unsetVisionForwarder();

@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 // slither-disable-next-line solc-version
 pragma solidity 0.8.26;
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
+import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {ERC20Pausable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
@@ -126,7 +129,7 @@ abstract contract VisionWrapper is
     function decimals()
         public
         view
-        override(VisionBaseToken, IBEP20, ERC20)
+        override(VisionBaseToken, IERC20Metadata, ERC20)
         returns (uint8)
     {
         return VisionBaseToken.decimals();
@@ -138,7 +141,7 @@ abstract contract VisionWrapper is
     function symbol()
         public
         view
-        override(VisionBaseToken, IBEP20, ERC20)
+        override(VisionBaseToken, IERC20Metadata, ERC20)
         returns (string memory)
     {
         return VisionBaseToken.symbol();
@@ -150,10 +153,25 @@ abstract contract VisionWrapper is
     function name()
         public
         view
-        override(VisionBaseToken, IBEP20, ERC20)
+        override(VisionBaseToken, IERC20Metadata, ERC20)
         returns (string memory)
     {
         return VisionBaseToken.name();
+    }
+
+    /**
+     * See {IERC20Permit}
+     */
+    function nonces(
+        address owner
+    )
+        public
+        view
+        virtual
+        override(IERC20Permit, VisionBaseToken)
+        returns (uint256)
+    {
+        return ERC20Permit.nonces(owner);
     }
 
     /**
