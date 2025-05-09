@@ -44,13 +44,30 @@ abstract contract VisionBaseTokenUpgradeable is
     bytes32 private constant VISION_BASE_TOKEN_STORAGE_LOCATION =
         0x8a83655261740f09e968720dd5982e8d17ec12a50d4d2f5e59ec427b5095b700;
 
+    /**
+     * @notice Modifier to make a function callable only by the Vision Forwarder
+     */
+    modifier onlyVisionForwarder() virtual {
+        VisionBaseTokenStorage storage vs = _getVisionBaseTokenStorage();
+        require(
+            vs._visionForwarder != address(0),
+            "VisionBaseToken: VisionForwarder has not been set"
+        );
+        require(
+            msg.sender == vs._visionForwarder,
+            "VisionBaseToken: caller is not the VisionForwarder"
+        );
+        _;
+    }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line func-visibility
     constructor() {
         _disableInitializers();
     }
 
-    function initializeVisionBaseToken(
+    // slither-disable-next-line naming-convention
+    function __VisionBaseToken_init(
         string memory name_,
         string memory symbol_,
         uint8 decimals_,
@@ -60,10 +77,11 @@ abstract contract VisionBaseTokenUpgradeable is
         __Ownable_init(owner_);
         __ERC20_init(name_, symbol_);
         __ERC20Permit_init(name_);
-        initializeVisionBaseTokenUnchained(decimals_);
+        __VisionBaseToken_init_unchained(decimals_);
     }
 
-    function initializeVisionBaseTokenUnchained(
+    // slither-disable-next-line naming-convention
+    function __VisionBaseToken_init_unchained(
         uint8 decimals_
     ) internal onlyInitializing {
         VisionBaseTokenStorage storage vs = _getVisionBaseTokenStorage();
@@ -84,22 +102,6 @@ abstract contract VisionBaseTokenUpgradeable is
         assembly {
             vs.slot := VISION_BASE_TOKEN_STORAGE_LOCATION
         }
-    }
-
-    /**
-     * @notice Modifier to make a function callable only by the Vision Forwarder
-     */
-    modifier onlyVisionForwarder() virtual {
-        VisionBaseTokenStorage storage vs = _getVisionBaseTokenStorage();
-        require(
-            vs._visionForwarder != address(0),
-            "VisionBaseToken: VisionForwarder has not been set"
-        );
-        require(
-            msg.sender == vs._visionForwarder,
-            "VisionBaseToken: caller is not the VisionForwarder"
-        );
-        _;
     }
 
     /**

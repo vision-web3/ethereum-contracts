@@ -64,7 +64,7 @@ contract VisionToken is
         address upgrader
     ) public initializer {
         // initializeVisionBaseToken() also initializes Upgradeable variants of ERC165, Ownable, ERC20, ERC20Permit
-        initializeVisionBaseToken(_NAME, _SYMBOL, _DECIMALS, criticalOps);
+        __VisionBaseToken_init(_NAME, _SYMBOL, _DECIMALS, criticalOps);
         __ERC20Pausable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -76,8 +76,6 @@ contract VisionToken is
         _grantRole(UPGRADER_ROLE, upgrader);
 
         ERC20Upgradeable._mint(super.getOwner(), initialSupply);
-        // Contract is paused until forwarder is set
-        _pause();
     }
 
     /**
@@ -97,21 +95,9 @@ contract VisionToken is
     }
 
     /**
-     * @dev See {VisionBaseTokenUpgradeable-onlyVisionForwarder}
-     */
-    modifier onlyVisionForwarder() virtual override {
-        require(
-            msg.sender == getVisionForwarder(),
-            "VisionToken: caller is not the VisionForwarder"
-        );
-        _;
-    }
-
-    /**
      * @notice Pauses the Token contract.
      * @dev Only callable by accounts with the `PAUSER_ROLE`
-     * and only if the contract is not paused.
-     * Requirements the contract must not be paused.
+     * Requirements: the contract must not be paused.
      */
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
@@ -120,14 +106,9 @@ contract VisionToken is
     /**
      * @notice Unpauses the Token contract.
      * @dev Only callable by accounts with the `CRITICAL_OPS`
-     * and only if the contract is paused.
      * Requirement: the contract must be paused.
      */
     function unpause() external onlyRole(CRITICAL_OPS) {
-        require(
-            getVisionForwarder() != address(0),
-            "VisionToken: VisionForwarder has not been set"
-        );
         _unpause();
     }
 

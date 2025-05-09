@@ -33,15 +33,6 @@ abstract contract VisionBaseToken is
 
     address private _visionForwarder;
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint8 decimals_,
-        address owner_
-    ) ERC20(name_, symbol_) ERC20Permit(name_) Ownable(owner_) {
-        _decimals = decimals_;
-    }
-
     /**
      * @notice Modifier to make a function callable only by the Vision Forwarder
      */
@@ -55,6 +46,15 @@ abstract contract VisionBaseToken is
             "VisionBaseToken: caller is not the VisionForwarder"
         );
         _;
+    }
+
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_,
+        address owner_
+    ) ERC20(name_, symbol_) ERC20Permit(name_) Ownable(owner_) {
+        _decimals = decimals_;
     }
 
     /**

@@ -52,8 +52,6 @@ contract VisionToken is VisionBaseToken, ERC20Pausable, AccessControl {
         _grantRole(MINTER_ROLE, minter);
         _grantRole(PAUSER_ROLE, pauser);
         ERC20._mint(super.getOwner(), initialSupply);
-        // Contract is paused until forwarder is set
-        _pause();
     }
 
     /**
@@ -73,21 +71,9 @@ contract VisionToken is VisionBaseToken, ERC20Pausable, AccessControl {
     }
 
     /**
-     * @dev See {VisionBaseToken-onlyVisionForwarder}
-     */
-    modifier onlyVisionForwarder() virtual override {
-        require(
-            msg.sender == getVisionForwarder(),
-            "VisionToken: caller is not the VisionForwarder"
-        );
-        _;
-    }
-
-    /**
      * @notice Pauses the Token contract.
-     * @dev Callable only by accounts with the `PAUSER_ROLE`
-     * and only when the contract is not paused.
-     * @dev See {Pausable-_pause)
+     * @dev Only callable by accounts with the `PAUSER_ROLE`
+     * Requirements: the contract must not be paused.
      */
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
@@ -95,15 +81,10 @@ contract VisionToken is VisionBaseToken, ERC20Pausable, AccessControl {
 
     /**
      * @notice Unpauses the Token contract.
-     * @dev Can only be called by accounts with the `CRITICAL_OPS` role.
-     * Requires the contract to be paused and the VisionForwarder to be set.
-     * @dev See {Pausable-_unpause)
+     * @dev Only callable by accounts with the `CRITICAL_OPS`
+     * Requirement: the contract must be paused.
      */
     function unpause() external onlyRole(CRITICAL_OPS) {
-        require(
-            getVisionForwarder() != address(0),
-            "VisionToken: VisionForwarder has not been set"
-        );
         _unpause();
     }
 
