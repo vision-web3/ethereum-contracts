@@ -272,3 +272,26 @@ RoleActions for all redeployed contracts (simulation only!)
 ```bash
 forge script ./script/redeploy/UpgradeHubAndRedeployForwarder.s.sol --rpc-url local-8545 -vvvv --sig "roleActions()"
 ```
+
+
+### DeployVisionTokenStandalone
+
+Deploy token logic and proxy
+Can be deployed by any gas paying account, but need to pass all the role account correctly
+
+```bash
+forge script ./script/DeployVisionTokenStandalone.s.sol   --account local_deployer   --password ''   --rpc-url local-8545   -vvvv   --sig "deploy(uint256,address,address,address,address,address)" 999999999999999 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266   0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266   0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266   0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+```bash
+
+pause token:
+Can be only called by pauser account
+```bash
+forge script ./script/DeployVisionTokenStandalone.s.sol   --account local_deployer   --password ''   --rpc-url local-8545   -vvvv   --sig "pause(address)" 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 
+```bash
+
+
+setBridge
+Can be only called by criticalOps account
+```bash
+forge script ./script/DeployVisionTokenStandalone.s.sol   --account local_deployer   --password ''   --rpc-url local-8545   -vvvv   --sig "setBridge(address, address)" 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0599
+```bash

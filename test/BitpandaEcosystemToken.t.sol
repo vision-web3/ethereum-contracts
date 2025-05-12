@@ -4,14 +4,16 @@ pragma solidity 0.8.26;
 
 import {console2} from "forge-std/console2.sol";
 
+import {AccessController} from "../src/access/AccessController.sol";
 import {IVisionToken} from "../src/interfaces/IVisionToken.sol";
-import {VisionBaseToken} from "../src/VisionBaseToken.sol";
+import {VisionBaseTokenUpgradeable} from "../src/VisionBaseTokenUpgradeable.sol";
 import {BitpandaEcosystemToken} from "../src/BitpandaEcosystemToken.sol";
 
 import {VisionBaseTokenTest} from "./VisionBaseToken.t.sol";
 
 contract BitpandaEcosystemTokenTest is VisionBaseTokenTest {
     BitpandaEcosystemTokenHarness bestToken;
+    AccessController public accessController;
 
     function setUp() public {
         accessController = deployAccessController();
@@ -28,7 +30,7 @@ contract BitpandaEcosystemTokenTest is VisionBaseTokenTest {
     }
 
     function test_pause_AfterInitialization() external {
-        initializeToken();
+        setBridgeAtToken();
 
         vm.prank(PAUSER);
         bestToken.pause();
@@ -47,7 +49,7 @@ contract BitpandaEcosystemTokenTest is VisionBaseTokenTest {
     }
 
     function test_pause_ByNonPauser() external {
-        initializeToken();
+        setBridgeAtToken();
         bytes memory calldata_ = abi.encodeWithSelector(
             bestToken.pause.selector
         );
@@ -56,13 +58,13 @@ contract BitpandaEcosystemTokenTest is VisionBaseTokenTest {
     }
 
     function test_unpause_AfterDeploy() external {
-        initializeToken();
+        setBridgeAtToken();
 
         assertFalse(bestToken.paused());
     }
 
     function test_unpause_WhenNotpaused() external {
-        initializeToken();
+        setBridgeAtToken();
         bytes memory calldata_ = abi.encodeWithSelector(
             bestToken.unpause.selector
         );
@@ -92,13 +94,13 @@ contract BitpandaEcosystemTokenTest is VisionBaseTokenTest {
     }
 
     function test_setVisionForwarder() external {
-        initializeToken();
+        setBridgeAtToken();
 
         assertEq(bestToken.getVisionForwarder(), VISION_FORWARDER_ADDRESS);
     }
 
     function test_setVisionForwarder_WhenNotpaused() external {
-        initializeToken();
+        setBridgeAtToken();
         bytes memory calldata_ = abi.encodeWithSelector(
             bestToken.setVisionForwarder.selector,
             VISION_FORWARDER_ADDRESS
@@ -152,7 +154,7 @@ contract BitpandaEcosystemTokenTest is VisionBaseTokenTest {
     }
 
     function test_unsetVisionForwarder() external {
-        initializeToken();
+        setBridgeAtToken();
         vm.expectEmit();
         emit IVisionToken.VisionForwarderUnset();
 
@@ -162,14 +164,21 @@ contract BitpandaEcosystemTokenTest is VisionBaseTokenTest {
         assertEq(bestToken.getVisionForwarder(), ADDRESS_ZERO);
     }
 
-    function initializeToken() public override {
+    function test_supportsInterface() external virtual override {
+        setBridgeAtToken();
+        assert(token().supportsInterface(bytes4(0x01ffc9a7)));
+        assert(token().supportsInterface(type(IVisionToken).interfaceId));
+        assert(!token().supportsInterface(0xffffffff));
+    }
+
+    function setBridgeAtToken() public override {
         vm.startPrank(SUPER_CRITICAL_OPS);
         bestToken.setVisionForwarder(VISION_FORWARDER_ADDRESS);
         bestToken.unpause();
         vm.stopPrank();
     }
 
-    function token() public view override returns (VisionBaseToken) {
+    function token() public view override returns (IVisionToken) {
         return bestToken;
     }
 

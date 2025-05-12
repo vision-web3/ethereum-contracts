@@ -87,7 +87,15 @@ contract DeployContracts is
         (visionHubProxy, visionHubInit, visionFacets) = deployVisionHub(
             accessController
         );
-        visionToken = deployVisionToken(vsnSupply, accessController);
+        // FIXME move vsn out and take it as input param
+        visionToken = deployVisionToken(
+            vsnSupply,
+            superCriticalOps,
+            superCriticalOps,
+            superCriticalOps,
+            superCriticalOps,
+            superCriticalOps
+        );
         visionForwarder = deployVisionForwarder(accessController);
         bitpandaEcosystemToken = deployBitpandaEcosystemToken(
             bestSupply,
@@ -132,7 +140,7 @@ contract DeployContracts is
         IVisionHub visionHub = IVisionHub(address(visionHubProxy));
 
         vm.startBroadcast(accessController.superCriticalOps());
-        initializeVisionToken(visionToken, visionForwarder);
+        setBridgeAtVisionToken(visionToken, visionForwarder); // FIXME move vsn configuration out
         initializeVisionHub(
             visionHub,
             visionForwarder,

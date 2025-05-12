@@ -195,7 +195,6 @@ abstract contract VisionWrapper is
     {
         return
             interfaceId == type(IVisionWrapper).interfaceId ||
-            interfaceId == type(ERC20Pausable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
     /**
