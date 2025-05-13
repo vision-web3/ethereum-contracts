@@ -27,7 +27,7 @@ contract VisionTokenTest is VisionBaseTokenTest {
     uint256 public constant TOKEN_DECIMALS = 18;
     uint256 public constant TOKEN_UNIT = 10 ** TOKEN_DECIMALS;
 
-    function setUp() public {
+    function setUp() public virtual {
         // Step 1: Deploy the VisionToken implementation contract
         VisionToken logic = new VisionToken();
 
@@ -58,7 +58,7 @@ contract VisionTokenTest is VisionBaseTokenTest {
         }
     }
 
-    function test_SetUpState() external view {
+    function test_SetUpState() public view virtual {
         assertEq(visionToken.name(), "Vision");
         assertEq(visionToken.symbol(), "VSN");
         assertEq(visionToken.decimals(), TOKEN_DECIMALS);
