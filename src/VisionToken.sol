@@ -19,7 +19,8 @@ import {VisionBaseTokenUpgradeable} from "./VisionBaseTokenUpgradeable.sol";
  * - The `CRITICAL_OPS_ROLE` role is managed using AccessControl, which allows multiple accounts to hold this role.
  * - However, the implementation assumes only one account will hold the `CRITICAL_OPS_ROLE` role at a time,
  *   in alignment with the `Ownable` nature of the base contract.
- * - The account with the `CRITICAL_OPS_ROLE` role must also be the contract owner, as enforced by the `Ownable` contract.
+ * - The account with the `CRITICAL_OPS_ROLE` role must also be the contract owner, as enforced by the `Ownable`
+ *   contract.
  * - Changing the `CRITICAL_OPS_ROLE` address requires both `grantRole`/`revokeRole` and `transferOwnership`.
  */
 contract VisionToken is

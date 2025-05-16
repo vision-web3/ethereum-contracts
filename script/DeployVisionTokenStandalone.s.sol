@@ -28,8 +28,7 @@ contract DeployVisionTokenStandalone is VisionTokenDeployer {
         );
         vm.stopBroadcast();
 
-        //TODO: Store the contract address somewhere 
-
+        //TODO: Store the contract address somewhere
     }
 
     // can be done by pauser account of vision Token
@@ -41,7 +40,7 @@ contract DeployVisionTokenStandalone is VisionTokenDeployer {
     }
 
     // can be done by criticalOps account of vision Token
-    function setBridge(
+    function setVisionForwarder(
         address visionTokenAddress,
         address visionForwarderAddress
     ) public {
@@ -51,12 +50,12 @@ contract DeployVisionTokenStandalone is VisionTokenDeployer {
         VisionToken visionToken = VisionToken(visionTokenAddress);
 
         vm.startBroadcast();
-        setBridgeAtVisionToken(visionToken, visionForwarder);
+        setVisionForwarderAtVisionToken(visionToken, visionForwarder);
         vm.stopBroadcast();
     }
 
     // can be done by criticalOps account of vision Token
-    function registerToken(
+    function registerTokenAtVisionHub(
         address visionTokenAddress,
         address visionHubAddress
     ) public {
@@ -64,7 +63,7 @@ contract DeployVisionTokenStandalone is VisionTokenDeployer {
         VisionToken visionToken = VisionToken(visionTokenAddress);
 
         vm.startBroadcast();
-        registerTokenAtVisionHub(visionToken, visionHub);
+        registerVisionTokenAtVisionHub(visionToken, visionHub);
         vm.stopBroadcast();
     }
 }

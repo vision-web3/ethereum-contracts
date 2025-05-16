@@ -52,7 +52,7 @@ abstract contract VisionTokenDeployer is VisionBaseScript {
         return visionToken;
     }
 
-    function setBridgeAtVisionToken(
+    function setVisionForwarderAtVisionToken(
         VisionToken visionToken,
         VisionForwarder visionForwarder
     ) public {
@@ -66,7 +66,7 @@ abstract contract VisionTokenDeployer is VisionBaseScript {
         );
     }
 
-    function registerTokenAtVisionHub(
+    function registerVisionTokenAtVisionHub(
         VisionToken visionToken,
         IVisionHub visionHub
     ) public {
