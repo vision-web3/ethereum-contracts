@@ -70,7 +70,7 @@ contract VisionTokenTest is VisionBaseTokenTest {
             visionToken.hasRole(visionToken.DEFAULT_ADMIN_ROLE(), roleAdmin)
         );
         assertTrue(
-            visionToken.hasRole(visionToken.CRITICAL_OPS(), criticalOps)
+            visionToken.hasRole(visionToken.CRITICAL_OPS_ROLE(), criticalOps)
         );
         assertTrue(visionToken.hasRole(visionToken.MINTER_ROLE(), minter));
         assertTrue(visionToken.hasRole(visionToken.PAUSER_ROLE(), pauser));
@@ -163,7 +163,7 @@ contract VisionTokenTest is VisionBaseTokenTest {
         onlyRoleAccessControlTest(
             address(visionToken),
             calldata_,
-            visionToken.CRITICAL_OPS()
+            visionToken.CRITICAL_OPS_ROLE()
         );
     }
 
@@ -180,7 +180,7 @@ contract VisionTokenTest is VisionBaseTokenTest {
         onlyRoleAccessControlTest(
             address(visionToken),
             calldata_,
-            visionToken.CRITICAL_OPS()
+            visionToken.CRITICAL_OPS_ROLE()
         );
     }
 
@@ -196,7 +196,7 @@ contract VisionTokenTest is VisionBaseTokenTest {
                 abi.encodeWithSelector(
                     IAccessControl.AccessControlUnauthorizedAccount.selector,
                     otherRole,
-                    visionToken.CRITICAL_OPS()
+                    visionToken.CRITICAL_OPS_ROLE()
                 )
             );
             visionToken.unpause();
@@ -243,7 +243,7 @@ contract VisionTokenTest is VisionBaseTokenTest {
         onlyRoleAccessControlTest(
             address(visionToken),
             calldata_,
-            visionToken.CRITICAL_OPS()
+            visionToken.CRITICAL_OPS_ROLE()
         );
     }
 

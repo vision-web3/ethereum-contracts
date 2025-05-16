@@ -14,11 +14,11 @@ import {VisionBaseToken} from "./VisionBaseToken.sol";
  * @dev
  * - Inherits core ERC20 logic and `Ownable` from VisionBaseToken.
  * - Uses AccessControl for role-based permissions (e.g., pausing, upgrading, minting).
- * - The `CRITICAL_OPS` role is managed using AccessControl, which allows multiple accounts to hold this role.
- * - However, the implementation assumes only one account will hold the `CRITICAL_OPS` role at a time,
+ * - The `CRITICAL_OPS_ROLE` role is managed using AccessControl, which allows multiple accounts to hold this role.
+ * - However, the implementation assumes only one account will hold the `CRITICAL_OPS_ROLE` role at a time,
  *   in alignment with the `Ownable` nature of the base contract.
- * - The account with the `CRITICAL_OPS` role must also be the contract owner, as enforced by the `Ownable` contract.
- * - Changing the `CRITICAL_OPS` address requires both `grantRole`/`revokeRole` and `transferOwnership`.
+ * - The account with the `CRITICAL_OPS_ROLE` role must also be the contract owner, as enforced by the `Ownable` contract.
+ * - Changing the `CRITICAL_OPS_ROLE` address requires both `grantRole`/`revokeRole` and `transferOwnership`.
  */
 contract VisionCompatibleToken is
     VisionBaseToken,
@@ -30,7 +30,7 @@ contract VisionCompatibleToken is
     uint8 private constant _DECIMALS = 18;
 
     /// @notice Role for critical ops on contract.
-    bytes32 public constant CRITICAL_OPS = keccak256("CRITICAL_OPS");
+    bytes32 public constant CRITICAL_OPS_ROLE = keccak256("CRITICAL_OPS_ROLE");
     /// @notice Role for minting tokens.
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     /// @notice Role for pausing the contract.
@@ -52,7 +52,7 @@ contract VisionCompatibleToken is
         address pauser
     ) VisionBaseToken(_NAME, _SYMBOL, _DECIMALS, criticalOps) {
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
-        _grantRole(CRITICAL_OPS, criticalOps);
+        _grantRole(CRITICAL_OPS_ROLE, criticalOps);
         _grantRole(MINTER_ROLE, minter);
         _grantRole(PAUSER_ROLE, pauser);
         ERC20._mint(super.getOwner(), initialSupply);
@@ -85,10 +85,10 @@ contract VisionCompatibleToken is
 
     /**
      * @notice Unpauses the Token contract.
-     * @dev Only callable by accounts with the `CRITICAL_OPS`
+     * @dev Only callable by accounts with the `CRITICAL_OPS_ROLE`
      * Requirement: the contract must be paused.
      */
-    function unpause() external onlyRole(CRITICAL_OPS) {
+    function unpause() external onlyRole(CRITICAL_OPS_ROLE) {
         _unpause();
     }
 
@@ -97,7 +97,7 @@ contract VisionCompatibleToken is
      */
     function setVisionForwarder(
         address visionForwarder
-    ) external whenPaused onlyRole(CRITICAL_OPS) {
+    ) external whenPaused onlyRole(CRITICAL_OPS_ROLE) {
         _setVisionForwarder(visionForwarder);
     }
 

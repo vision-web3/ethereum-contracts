@@ -71,7 +71,7 @@ contract DeployContracts is
     VisionWrapper[] visionWrappers;
     VisionTokenMigrator visionTokenMigrator;
 
-    function deploy(uint256 vsnSupply, uint256 bestSupply) public {
+    function deploy() public {
         vm.startBroadcast();
         readRoleAddresses();
         address pauser = getRoleAddress(Role.PAUSER);
@@ -87,20 +87,8 @@ contract DeployContracts is
         (visionHubProxy, visionHubInit, visionFacets) = deployVisionHub(
             accessController
         );
-        // FIXME move vsn out and take it as input param
-        visionToken = deployVisionToken(
-            vsnSupply,
-            superCriticalOps,
-            superCriticalOps,
-            superCriticalOps,
-            superCriticalOps,
-            superCriticalOps
-        );
+
         visionForwarder = deployVisionForwarder(accessController);
-        bitpandaEcosystemToken = deployBitpandaEcosystemToken(
-            bestSupply,
-            accessController
-        );
         visionWrappers = deployCoinWrappers(accessController);
         vm.stopBroadcast();
 
@@ -140,7 +128,6 @@ contract DeployContracts is
         IVisionHub visionHub = IVisionHub(address(visionHubProxy));
 
         vm.startBroadcast(accessController.superCriticalOps());
-        setBridgeAtVisionToken(visionToken, visionForwarder); // FIXME move vsn configuration out
         initializeVisionHub(
             visionHub,
             visionForwarder,
@@ -164,11 +151,6 @@ contract DeployContracts is
             visionToken,
             minimumValidatorNodeSignatures,
             validatorNodeAddresses
-        );
-        initializeBitpandaEcosystemToken(
-            bitpandaEcosystemToken,
-            visionHub,
-            visionForwarder
         );
         initializeVisionWrappers(visionHub, visionForwarder, visionWrappers);
         vm.stopBroadcast();
@@ -269,9 +251,6 @@ contract DeployContracts is
             getContractAddress(Contract.FORWARDER, false)
         );
         visionToken = VisionToken(getContractAddress(Contract.VSN, false));
-        bitpandaEcosystemToken = BitpandaEcosystemToken(
-            getContractAddress(Contract.BEST, false)
-        );
         visionWrappers = new VisionWrapper[](7);
         visionWrappers[0] = VisionWrapper(
             getContractAddress(Contract.VSN_AVAX, false)

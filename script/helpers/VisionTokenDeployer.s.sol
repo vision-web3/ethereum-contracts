@@ -6,6 +6,7 @@ import {console} from "forge-std/console.sol";
 
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
+import {IVisionHub} from "../../src/interfaces/IVisionHub.sol";
 import {VisionForwarder} from "../../src/VisionForwarder.sol";
 import {VisionToken} from "../../src/VisionToken.sol";
 import {AccessController} from "../../src/access/AccessController.sol";
@@ -61,6 +62,22 @@ abstract contract VisionTokenDeployer is VisionBaseScript {
             "Token=%s; Bridge=%s; paused=%s",
             visionToken.name(),
             visionToken.getVisionForwarder(),
+            visionToken.paused()
+        );
+    }
+
+    function registerTokenAtVisionHub(
+        VisionToken visionToken,
+        IVisionHub visionHub
+    ) public {
+        // TODO: replace this with ideal solution to register vsn independently
+        // Ideally visionHub should be paused until vsn is registered, need to assess if its
+        // okay to unpause visionHub before this step
+        visionHub.registerToken(address(visionToken));
+        console.log(
+            "Token=%s registered at VisionHub=%s; paused=%s",
+            visionToken.name(),
+            visionHub.getVisionToken(),
             visionToken.paused()
         );
     }

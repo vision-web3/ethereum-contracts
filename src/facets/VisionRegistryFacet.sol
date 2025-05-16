@@ -122,7 +122,7 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
         );
         s.visionToken = visionToken;
         emit VisionTokenSet(visionToken);
-        registerToken(visionToken);
+        // registerToken(visionToken); TODO check!
     }
 
     /**
