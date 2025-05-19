@@ -30,6 +30,18 @@ contract RegisterExternalTokens is VisionBaseAddresses, SafeAddresses {
     function registerExternalToken(Blockchain memory otherBlockchain) private {
         string[] memory tokenSymbols = getTokenSymbols();
         for (uint256 i = 0; i < tokenSymbols.length; i++) {
+            if (
+                keccak256(abi.encodePacked(tokenSymbols[i])) ==
+                keccak256(abi.encodePacked("vsn"))
+            ) {
+                console2.log(
+                    "(Skipping) %s; chain=%s",
+                    tokenSymbols[i],
+                    otherBlockchain.name
+                );
+                continue;
+            }
+
             Contract contract_ = _keysToContracts[tokenSymbols[i]];
             address token = getContractAddress(contract_, false);
             string memory externalToken = getContractAddressAsString(
@@ -57,7 +69,7 @@ contract RegisterExternalTokens is VisionBaseAddresses, SafeAddresses {
                     externalToken
                 );
             } else {
-                //  Check if already registerd token matches with one in the json
+                //  Check if already registered token matches with one in the json
                 if (
                     keccak256(
                         abi.encodePacked(externalTokenRecord.externalToken)

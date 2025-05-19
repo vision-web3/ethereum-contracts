@@ -12,17 +12,39 @@ DEPLOYER_PRIVATE_KEY=$(cast wallet private-key --mnemonic "$MNEMONIC" --mnemonic
 MEDIUM_CRITICAL_OPS_PRIVATE_KEY=$(cast wallet private-key --mnemonic "$MNEMONIC" --mnemonic-index 102) # 0x0e9971c0005D91336c1441b8F03c1C4fe5FB4584
 SUPER_CRITICAL_OPS_PRIVATE_KEY=$(cast wallet private-key --mnemonic "$MNEMONIC" --mnemonic-index 103) # 0xC4c81D5C1851702d27d602aA8ff830A7689F17cc
 
+VSN_TOKEN_ADMIN_PRIVATE_KEY=$(cast wallet private-key --mnemonic "$MNEMONIC" --mnemonic-index 200) #
+VSN_TOKEN_CRITICAL_OPS_PRIVATE_KEY=$(cast wallet private-key --mnemonic "$MNEMONIC" --mnemonic-index 201) #
+VSN_TOKEN_MINTER_PRIVATE_KEY=$(cast wallet private-key --mnemonic "$MNEMONIC" --mnemonic-index 202) #
+VSN_TOKEN_PAUSER_PRIVATE_KEY=$(cast wallet private-key --mnemonic "$MNEMONIC" --mnemonic-index 203) #
+VSN_TOKEN_UPGRADER_PRIVATE_KEY=$(cast wallet private-key --mnemonic "$MNEMONIC" --mnemonic-index 204) #
+
+
 cast wallet import --unsafe-password '' --private-key "$GAS_PAYER_PRIVATE_KEY" gas_payer
 cast wallet import --unsafe-password '' --private-key "$PAUSER_PRIVATE_KEY" pauser
 cast wallet import --unsafe-password '' --private-key "$DEPLOYER_PRIVATE_KEY" deployer
 cast wallet import --unsafe-password '' --private-key "$MEDIUM_CRITICAL_OPS_PRIVATE_KEY" medium_critical_ops
 cast wallet import --unsafe-password '' --private-key "$SUPER_CRITICAL_OPS_PRIVATE_KEY" super_critical_ops
 
+echo "Starting VSN_TOKEN_ADMIN_PRIVATE_KEY)"
+cast wallet import --unsafe-password '' --private-key "$VSN_TOKEN_ADMIN_PRIVATE_KEY" vsn_admin
+cast wallet import --unsafe-password '' --private-key "$VSN_TOKEN_CRITICAL_OPS_PRIVATE_KEY" vsn_critical_ops
+cast wallet import --unsafe-password '' --private-key "$VSN_TOKEN_MINTER_PRIVATE_KEY" vsn_minter 
+cast wallet import --unsafe-password '' --private-key "$VSN_TOKEN_PAUSER_PRIVATE_KEY" vsn_pauser
+cast wallet import --unsafe-password '' --private-key "$VSN_TOKEN_UPGRADER_PRIVATE_KEY" vsn_upgrader
+
 GAS_PAYER_ADDRESS=$(cast wallet address --account gas_payer --password '')
 PAUSER_SIGNER_ADDRESS=$(cast wallet address --account pauser --password '')
 DEPLOYER_SIGNER_ADDRESS=$(cast wallet address --account deployer --password '')
 MEDIUM_CRITICAL_OPS_SIGNER_ADDRESS=$(cast wallet address --account medium_critical_ops --password '')
 SUPER_CRITICAL_OPS_SIGNER_ADDRESS=$(cast wallet address --account super_critical_ops --password '')
+
+echo "Starting VSN_TOKEN_ADMIN_ADDRESS)"
+VSN_TOKEN_ADMIN_ADDRESS=$(cast wallet address --account vsn_admin --password '')
+VSN_TOKEN_CRITICAL_OPS_ADDRESS=$(cast wallet address --account vsn_critical_ops --password '')
+VSN_TOKEN_MINTER_ADDRESS=$(cast wallet address --account vsn_minter --password '')
+VSN_TOKEN_PAUSER_ADDRESS=$(cast wallet address --account vsn_pauser --password '')
+VSN_TOKEN_UPGRADER_ADDRESS=$(cast wallet address --account vsn_upgrader --password '')
+
 
 declare -A chains
 chains=(
@@ -98,7 +120,13 @@ deploy_for_chain() {
     cp -f ~/.foundry/keystores/deployer $chain_dir/deployer
     cp -f ~/.foundry/keystores/medium_critical_ops $chain_dir/medium_critical_ops
     cp -f ~/.foundry/keystores/super_critical_ops $chain_dir/super_critical_ops
-    
+
+    cp -f ~/.foundry/keystores/vsn_admin $chain_dir/vsn_admin
+    cp -f ~/.foundry/keystores/vsn_critical_ops $chain_dir/vsn_critical_ops
+    cp -f ~/.foundry/keystores/vsn_minter $chain_dir/vsn_minter
+    cp -f ~/.foundry/keystores/vsn_pauser $chain_dir/vsn_pauser
+    cp -f ~/.foundry/keystores/vsn_upgrader $chain_dir/vsn_upgrader
+
     echo "Starting deployment for $chain (Chain ID: $chain_id, Port: $port)"
 
     # Start anvil in the background
@@ -111,6 +139,23 @@ deploy_for_chain() {
         sleep 1
     done
 
+    # top up vsn token role with native ccy
+    cast send --account gas_payer --password '' --value 100ether "$VSN_TOKEN_PAUSER_ADDRESS" \
+     --rpc-url http://127.0.0.1:$port
+    cast send --account gas_payer --password '' --value 100ether "$VSN_TOKEN_CRITICAL_OPS_ADDRESS" \
+     --rpc-url http://127.0.0.1:$port
+
+    # deploy vision token standalone
+    forge script $ROOT_DIR/script/VisionTokenStandalone.s.sol --account gas_payer \
+       --password ''  --rpc-url http://127.0.0.1:$port   -vvvv \
+       --sig "deploy(uint256,address,address,address,address,address)" \
+       1000000000000000000 "$VSN_TOKEN_ADMIN_ADDRESS" "$VSN_TOKEN_CRITICAL_OPS_ADDRESS" "$VSN_TOKEN_MINTER_ADDRESS" \
+       "$VSN_TOKEN_PAUSER_ADDRESS" "$VSN_TOKEN_UPGRADER_ADDRESS" --broadcast
+
+    # capture vision token address 
+    VISION_TOKEN_ADDRESS=$(jq -r '.vsn' "$ROOT_DIR/$chain-VSN.json")
+    echo "VISION_TOKEN_ADDRESS --- $VISION_TOKEN_ADDRESS"
+
     forge script "$ROOT_DIR/script/DeploySafe.s.sol" --account gas_payer --chain-id $chain_id \
         --password '' --rpc-url http://127.0.0.1:$port \
         --sig "deploySafes(address[],uint256,address[],uint256,address[],uint256,address[],uint256)" \
@@ -119,7 +164,23 @@ deploy_for_chain() {
 
     forge script "$ROOT_DIR/script/DeployContracts.s.sol" --account gas_payer --chain-id $chain_id \
         --password '' --rpc-url http://127.0.0.1:$port \
-        --sig "deploy(uint256,uint256)" 10000000000000000 10000000000000000 --broadcast -vvv
+        --sig "deploy()" --broadcast -vvv
+    # capture vision forwarder and hub address address 
+    FORWARDER_ADDRESS=$(jq -r '.forwarder' "$ROOT_DIR/$chain.json")
+    echo "FORWARDER_ADDRESS --- $FORWARDER_ADDRESS"
+    HUB_PROXY_ADDRESS=$(jq -r '.hub_proxy' "$ROOT_DIR/$chain.json")
+    echo "HUB_PROXY_ADDRESS --- $HUB_PROXY_ADDRESS"
+    # write vsn token to json
+    jq --arg vsn "$VISION_TOKEN_ADDRESS" '.vsn = $vsn' "$ROOT_DIR/$chain.json" > tmp.json && mv tmp.json "$ROOT_DIR/$chain.json"
+    cat "$ROOT_DIR/$chain.json"
+
+    # now set forwarder at vision token
+    forge script $ROOT_DIR/script/VisionTokenStandalone.s.sol   --account vsn_pauser --password '' \
+       --rpc-url http://127.0.0.1:$port -vvv --sig "pause(address)" "$VISION_TOKEN_ADDRESS" --broadcast
+
+    forge script $ROOT_DIR/script/VisionTokenStandalone.s.sol   --account vsn_critical_ops --password '' \
+       --rpc-url http://127.0.0.1:$port -vvv --sig "setVisionForwarder(address, address)" \
+       "$VISION_TOKEN_ADDRESS" "$FORWARDER_ADDRESS" --broadcast
 
     forge script "$ROOT_DIR/script/DeployContracts.s.sol" --chain-id $chain_id --rpc-url http://127.0.0.1:$port \
         --sig "roleActions(uint256,uint256,uint256,address,address[])" 0 10 1 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 []
@@ -129,25 +190,21 @@ deploy_for_chain() {
     forge script "$ROOT_DIR/script/SubmitSafeTxs.s.sol" --account gas_payer --chain-id $chain_id \
         --password '' --rpc-url http://127.0.0.1:$port --sig "run()" --broadcast -vvv
 
+    # register vsn as hub
+    forge script $ROOT_DIR/script/VisionTokenStandalone.s.sol   --account vsn_pauser --password '' \
+       --rpc-url http://127.0.0.1:$port -vvv --sig "pause(address)" "$VISION_TOKEN_ADDRESS" --broadcast    
+    forge script $ROOT_DIR/script/VisionTokenStandalone.s.sol   --account vsn_critical_ops --password '' \
+    --rpc-url http://127.0.0.1:$port -vvv --sig "registerTokenAtVisionHub(address, address)" \
+    "$VISION_TOKEN_ADDRESS" "$HUB_PROXY_ADDRESS" --broadcast
+
     # send the VSN tokens from the super critical role safe to the gas payer
-    calldata=$(cast calldata "transfer(address,uint256)" $GAS_PAYER_ADDRESS 10000000000000000)
-    super_critical_ops_safe_address=$(jq -r '.super_critical_ops' "$ROOT_DIR/$chain-ROLES.json")
-    vsn_token_contract_address=$(jq -r '.vsn' "$ROOT_DIR/$chain.json")
-    nonce=$(cast call $super_critical_ops_safe_address "nonce()(uint256)" --rpc-url http://127.0.0.1:$port)
-    tx_hash=$(cast call $super_critical_ops_safe_address \
-        "getTransactionHash(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,uint256)" \
-        $vsn_token_contract_address 0 $calldata 0 0 0 0 0x0000000000000000000000000000000000000000 \
-        0x0000000000000000000000000000000000000000 $nonce --rpc-url http://127.0.0.1:$port)
-    cast send --account gas_payer --password '' $SUPER_CRITICAL_OPS_SIGNER_ADDRESS --value 1ether \
-        --rpc-url http://127.0.0.1:$port --gas-price 10gwei --confirmations 1
-    cast send --account super_critical_ops --password '' $super_critical_ops_safe_address \
-        "approveHash(bytes32)" $tx_hash --rpc-url http://127.0.0.1:$port --gas-price 10gwei --confirmations 1
-    cast send --account gas_payer --password '' $super_critical_ops_safe_address \
-        "execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)" \
-        $vsn_token_contract_address 0 $calldata 0 0 0 0 0x0000000000000000000000000000000000000000 \
-        0x0000000000000000000000000000000000000000 \
-        "0x000000000000000000000000${SUPER_CRITICAL_OPS_SIGNER_ADDRESS:2}000000000000000000000000000000000000000000000000000000000000000001" \
-        --rpc-url http://127.0.0.1:$port --gas-price 10gwei --confirmations 1
+    cast call "$VISION_TOKEN_ADDRESS" "balanceOf(address)(uint256)" "$VSN_TOKEN_CRITICAL_OPS_ADDRESS" --rpc-url http://127.0.0.1:$port
+    cast call "$VISION_TOKEN_ADDRESS" "getOwner()" --rpc-url http://127.0.0.1:$port
+    echo "VSN_TOKEN_CRITICAL_OPS_ADDRESS -- $VSN_TOKEN_CRITICAL_OPS_ADDRESS"
+
+    cast send "$VISION_TOKEN_ADDRESS" "transfer(address,uint256)" "$GAS_PAYER_ADDRESS" 100000000000000 --account vsn_critical_ops --password '' --rpc-url http://127.0.0.1:$port
+
+    cast call "$VISION_TOKEN_ADDRESS" "balanceOf(address)(uint256)" "$GAS_PAYER_ADDRESS" --rpc-url http://127.0.0.1:$port
 
     jq --arg chain "$chain" -r 'to_entries | map({key: (if .key == "hub_proxy" then "hub" elif .key == "vsn" then "vsn_token" else .key end), value: .value}) | map("\($chain|ascii_upcase)_\(.key|ascii_upcase)=\(.value|tostring)") | .[]' "$ROOT_DIR/$chain.json" > "$chain_dir/$chain.env"
     cat "$chain_dir/$chain.env" > "$chain_dir/all.env"

@@ -161,8 +161,8 @@ contract DeployContracts is
         bool isMigratorIncludedInExport
     ) internal {
         uint256 length = isMigratorIncludedInExport
-            ? 11 + visionWrappers.length
-            : 10 + visionWrappers.length;
+            ? 10 + visionWrappers.length
+            : 9 + visionWrappers.length;
         ContractAddress[] memory contractAddresses = new ContractAddress[](
             length
         );
@@ -202,12 +202,8 @@ contract DeployContracts is
             Contract.VSN,
             address(visionToken)
         );
-        contractAddresses[9] = ContractAddress(
-            Contract.BEST,
-            address(bitpandaEcosystemToken)
-        );
         for (uint i; i < visionWrappers.length; i++) {
-            contractAddresses[i + 10] = ContractAddress(
+            contractAddresses[i + 9] = ContractAddress(
                 _keysToContracts[visionWrappers[i].symbol()],
                 address(visionWrappers[i])
             );

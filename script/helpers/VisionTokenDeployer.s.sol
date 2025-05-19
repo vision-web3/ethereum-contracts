@@ -70,10 +70,8 @@ abstract contract VisionTokenDeployer is VisionBaseScript {
         VisionToken visionToken,
         IVisionHub visionHub
     ) public {
-        // TODO: replace this with ideal solution to register vsn independently
-        // Ideally visionHub should be paused until vsn is registered, need to assess if its
-        // okay to unpause visionHub before this step
         visionHub.registerToken(address(visionToken));
+        visionToken.unpause();
         console.log(
             "Token=%s registered at VisionHub=%s; paused=%s",
             visionToken.name(),

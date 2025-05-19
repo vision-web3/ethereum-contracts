@@ -8,7 +8,7 @@ import {VisionForwarder} from "../src/VisionForwarder.sol";
 import {VisionTokenDeployer} from "./helpers/VisionTokenDeployer.s.sol";
 import {Constants} from "./helpers/Constants.s.sol";
 
-contract DeployVisionTokenStandalone is VisionTokenDeployer {
+contract VisionTokenStandalone is VisionTokenDeployer {
     function deploy(
         uint256 vsnSupply,
         address defaultAdmin,
@@ -18,7 +18,7 @@ contract DeployVisionTokenStandalone is VisionTokenDeployer {
         address upgrader
     ) public {
         vm.startBroadcast();
-        VisionToken token = deployVisionToken(
+        VisionToken visionToken = deployVisionToken(
             vsnSupply,
             defaultAdmin,
             criticalOps,
@@ -28,7 +28,13 @@ contract DeployVisionTokenStandalone is VisionTokenDeployer {
         );
         vm.stopBroadcast();
 
-        //TODO: Store the contract address somewhere
+        // Store the contract address at [blockchain]_VSN.json
+        string memory data;
+        data = vm.serializeAddress(data, "vsn", address(visionToken));
+        vm.writeJson(
+            data,
+            string.concat(determineBlockchain().name, "-VSN.json")
+        );
     }
 
     // can be done by pauser account of vision Token
