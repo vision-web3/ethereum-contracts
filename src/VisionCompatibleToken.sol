@@ -10,7 +10,7 @@ import {VisionBaseToken} from "./VisionBaseToken.sol";
 
 /**
  * @title VisionCompatibleToken
- * @notice ERC20 token with role-based access control, pausing, and permit support.
+ * @notice Vision compatible ERC20 token example with role-based access control, pausing, and permit support.
  * @dev
  * - Inherits core ERC20 logic and `Ownable` from VisionBaseToken.
  * - Uses AccessControl for role-based permissions (e.g., pausing, upgrading, minting).
@@ -26,9 +26,9 @@ contract VisionCompatibleToken is
     ERC20Pausable,
     AccessControl
 {
-    string private constant _NAME = "Vision";
-    string private constant _SYMBOL = "VSN";
-    uint8 private constant _DECIMALS = 18;
+    string private constant _NAME = "Vision Compatible Token";
+    string private constant _SYMBOL = "VCT";
+    uint8 private constant _DECIMALS = 8;
 
     /// @notice Role for critical ops on contract.
     bytes32 public constant CRITICAL_OPS_ROLE = keccak256("CRITICAL_OPS_ROLE");

@@ -202,8 +202,8 @@ abstract contract VisionHubDeployer is VisionBaseScript {
 
         address currentVisionToken = visionHub.getVisionToken();
         if (currentVisionToken != address(visionToken)) {
-            // FIXME: at this point, visionToken should set bridge,
-            // if we decide visiontoken to do it later, this check needs to be done at later stages
+            // Note: before initializeVisionHub, visionToken owner should call setVisionForwarder,
+            // if we decide visionToken to do it later, this check needs to be done at later stages
             if (visionToken.getVisionForwarder() != address(visionForwarder)) {
                 revert(
                     "VisionHub: The VisionToken's forwarder is not set to "
