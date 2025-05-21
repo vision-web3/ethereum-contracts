@@ -25,8 +25,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
  * This scripts expect the address json files to be available at project
  * root dir. The JSON file name should be <BLOCKCHAIN_NAME>-VSN.json
  * where <BLOCKCHAIN_NAME> is the name of the blockchain (e.g. "ETHEREUM").
- * 
- * forge script ./script/RegisterExternalVisionTokens.s.sol --sig "roleActions(address, address)" 0x6ed4563D4fb366E54bf2de20d7B6EAB5BAD8c0c3 0x4AfC4f7c6b4AB45D5Bd7Ea153E0A3E751607891b --rpc-url "https://1rpc.io/holesky" -vvvv
+ *
  */
 contract RegisterExternalVisionTokens is VisionBaseScript, SafeAddresses {
     IVisionHub public visionHubProxy;
@@ -35,7 +34,7 @@ contract RegisterExternalVisionTokens is VisionBaseScript, SafeAddresses {
 
     function readVisionAddress(
         Blockchain memory blockchain
-    ) public view returns (address){
+    ) public view returns (address) {
         string memory path = string.concat(
             blockchain.name,
             _jsonFileNameExtension
@@ -53,16 +52,18 @@ contract RegisterExternalVisionTokens is VisionBaseScript, SafeAddresses {
         address _externalVisionTokenAddress
     ) private {
         VisionTypes.ExternalTokenRecord
-            memory externalTokenRecord = visionHubProxy
-                .getExternalTokenRecord(
-                    _visionTokenAddress,
-                    uint256(otherBlockchain.blockchainId)
-                );
+            memory externalTokenRecord = visionHubProxy.getExternalTokenRecord(
+                _visionTokenAddress,
+                uint256(otherBlockchain.blockchainId)
+            );
         if (!externalTokenRecord.active) {
             visionHubProxy.registerExternalToken(
                 _visionTokenAddress,
                 uint256(otherBlockchain.blockchainId),
-                Strings.toHexString(uint256(uint160(_externalVisionTokenAddress)), 20)
+                Strings.toHexString(
+                    uint256(uint160(_externalVisionTokenAddress)),
+                    20
+                )
             );
             console2.log(
                 "Vision externally registered on chain=%s; externalTokenAddress=%s",
@@ -95,7 +96,10 @@ contract RegisterExternalVisionTokens is VisionBaseScript, SafeAddresses {
                 visionHubProxy.registerExternalToken(
                     _visionTokenAddress,
                     uint256(otherBlockchain.blockchainId),
-                    Strings.toHexString(uint256(uint160(_externalVisionTokenAddress)), 20)
+                    Strings.toHexString(
+                        uint256(uint160(_externalVisionTokenAddress)),
+                        20
+                    )
                 );
                 console2.log(
                     "VisionHub.registerExternalToken(%s, %s, %s)",
@@ -114,27 +118,45 @@ contract RegisterExternalVisionTokens is VisionBaseScript, SafeAddresses {
         }
     }
 
-    function roleActions(address _hubAddress, address _accessController) public {       
+    function roleActions(
+        address _hubAddress,
+        address _accessController
+    ) public {
         visionHubProxy = IVisionHub(_hubAddress);
         accessController = AccessController(_accessController);
 
         Blockchain memory currentBlockchain = determineBlockchain();
-        address currentVisionTokenAddress = readVisionAddress(currentBlockchain);
-        console2.log("Current Vision token address: %s", currentVisionTokenAddress);
+        address currentVisionTokenAddress = readVisionAddress(
+            currentBlockchain
+        );
+        console2.log(
+            "Current Vision token address: %s",
+            currentVisionTokenAddress
+        );
         address externalVisionTokenAddress;
-        
+
         address superCriticalOps = accessController.superCriticalOps();
         vm.startBroadcast(superCriticalOps);
 
         for (uint256 i; i < getBlockchainsLength(); i++) {
             Blockchain memory blockchain = getBlockchainById(BlockchainId(i));
 
-            if (i == uint256(currentBlockchain.blockchainId) || blockchain.skip) {
-                console2.log("Skipping registration from %s on %s", blockchain.name, currentBlockchain.name);
+            if (
+                i == uint256(currentBlockchain.blockchainId) || blockchain.skip
+            ) {
+                console2.log(
+                    "Skipping registration from %s on %s",
+                    blockchain.name,
+                    currentBlockchain.name
+                );
                 continue;
             }
-            
-            console2.log("Registering external Vision token from %s on %s", blockchain.name, currentBlockchain.name);
+
+            console2.log(
+                "Registering external Vision token from %s on %s",
+                blockchain.name,
+                currentBlockchain.name
+            );
             externalVisionTokenAddress = readVisionAddress(blockchain);
 
             registerExternalToken(
@@ -147,5 +169,3 @@ contract RegisterExternalVisionTokens is VisionBaseScript, SafeAddresses {
         writeAllSafeInfo(accessController);
     }
 }
-
-
