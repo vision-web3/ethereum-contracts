@@ -240,6 +240,24 @@ register_tokens() {
         sleep 1
     done
 
+    ACCESS_CONTROLLER_ADDRESS=$(jq -r '.access_controller' "$ROOT_DIR/$chain.json")
+    echo "ACCESS_CONTROLLER_ADDRESS --- $ACCESS_CONTROLLER_ADDRESS"
+
+    forge script "$ROOT_DIR/script/RegisterExternalVisionTokens.s.sol" --chain-id $chain_id \
+        --rpc-url http://127.0.0.1:$port  --sig "roleActions(address, address)" "$HUB_PROXY_ADDRESS" "$ACCESS_CONTROLLER_ADDRESS"
+
+    sign_safe_transactions "RegisterExternalVisionTokens" "roleActions" "$chain" "$chain_id" "super_critical_ops"
+
+    forge script "$ROOT_DIR/script/SubmitSafeTxs.s.sol" --account gas_payer --chain-id $chain_id \
+        --password '' --rpc-url http://127.0.0.1:$port --sig "run()" --broadcast -vvv
+
+    echo "Waiting for the state to change for $chain..."
+
+    # While the state is the same, keep waiting
+    while [ $(sha256sum "$ROOT_DIR/anvil-state-$chain.json" | cut -d ' ' -f 1) = $HASH ]; do
+        sleep 1
+    done
+
     cp "$ROOT_DIR/anvil-state-$chain.json" "$chain_dir/anvil-state-$chain.json"
 
     for contract_folder in /root/broadcast/*; do
