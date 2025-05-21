@@ -4,11 +4,9 @@ pragma solidity 0.8.26;
 /* solhint-disable no-console*/
 import {console2} from "forge-std/console2.sol";
 
-import {AccessController} from "../src/access/AccessController.sol";
 import {IVisionHub} from "../src/interfaces/IVisionHub.sol";
 import {VisionTypes} from "../src/interfaces/VisionTypes.sol";
 import {VisionBaseScript} from "./helpers/VisionBaseScript.s.sol";
-import {SafeAddresses} from "./helpers/SafeAddresses.s.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
@@ -19,17 +17,16 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
  *
  * @dev Usage
  * forge script ./script/RegisterExternalVisionTokens.s.sol \
- * --rpc-url <rpc alias> --sig "roleActions(address, address)" \
- * <hubAddress> <accessControllerAddress> -vvvv
+ * --rpc-url <rpc alias> --sig "registerVisionInHub(address)" \
+ * <hubAddress> -vvvv
  *
  * This scripts expect the address json files to be available at project
  * root dir. The JSON file name should be <BLOCKCHAIN_NAME>-VSN.json
  * where <BLOCKCHAIN_NAME> is the name of the blockchain (e.g. "ETHEREUM").
  *
  */
-contract RegisterExternalVisionTokens is VisionBaseScript, SafeAddresses {
+contract RegisterExternalVisionTokens is VisionBaseScript {
     IVisionHub public visionHubProxy;
-    AccessController public accessController;
     string private _jsonFileNameExtension = "-VSN.json";
 
     function readVisionAddress(
@@ -118,12 +115,8 @@ contract RegisterExternalVisionTokens is VisionBaseScript, SafeAddresses {
         }
     }
 
-    function roleActions(
-        address _hubAddress,
-        address _accessController
-    ) public {
+    function registerVisionInHub(address _hubAddress) public {
         visionHubProxy = IVisionHub(_hubAddress);
-        accessController = AccessController(_accessController);
 
         Blockchain memory currentBlockchain = determineBlockchain();
         address currentVisionTokenAddress = readVisionAddress(
@@ -135,8 +128,7 @@ contract RegisterExternalVisionTokens is VisionBaseScript, SafeAddresses {
         );
         address externalVisionTokenAddress;
 
-        address superCriticalOps = accessController.superCriticalOps();
-        vm.startBroadcast(superCriticalOps);
+        vm.startBroadcast();
 
         for (uint256 i; i < getBlockchainsLength(); i++) {
             Blockchain memory blockchain = getBlockchainById(BlockchainId(i));
@@ -166,6 +158,5 @@ contract RegisterExternalVisionTokens is VisionBaseScript, SafeAddresses {
             );
         }
         vm.stopBroadcast();
-        writeAllSafeInfo(accessController);
     }
 }

@@ -244,12 +244,8 @@ register_tokens() {
     echo "ACCESS_CONTROLLER_ADDRESS --- $ACCESS_CONTROLLER_ADDRESS"
 
     forge script "$ROOT_DIR/script/RegisterExternalVisionTokens.s.sol" --chain-id $chain_id \
-        --rpc-url http://127.0.0.1:$port  --sig "roleActions(address, address)" "$HUB_PROXY_ADDRESS" "$ACCESS_CONTROLLER_ADDRESS"
-
-    sign_safe_transactions "RegisterExternalVisionTokens" "roleActions" "$chain" "$chain_id" "super_critical_ops"
-
-    forge script "$ROOT_DIR/script/SubmitSafeTxs.s.sol" --account gas_payer --chain-id $chain_id \
-        --password '' --rpc-url http://127.0.0.1:$port --sig "run()" --broadcast -vvv
+        --rpc-url http://127.0.0.1:$port  --sig "registerVisionInHub(address)" "$HUB_PROXY_ADDRESS" \
+        --account vsn_critical_ops --password '' --broadcast
 
     echo "Waiting for the state to change for $chain..."
 
