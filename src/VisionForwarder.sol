@@ -106,7 +106,7 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
     /**
      * @dev See {Pausable-_pause}.
      */
-    function pause() external whenNotPaused onlyRole(VisionRoles.PAUSER) {
+    function pause() external whenNotPaused onlyRole(VisionRoles.PAUSER_ROLE) {
         _pause();
     }
 
@@ -116,7 +116,7 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
     function unpause()
         external
         whenPaused
-        onlyRole(VisionRoles.SUPER_CRITICAL_OPS)
+        onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE)
     {
         require(
             _visionHub != address(0),
@@ -144,7 +144,7 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
      */
     function setVisionHub(
         address visionHub
-    ) external whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    ) external whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE) {
         require(
             visionHub != address(0),
             "VisionForwarder: VisionHub must not be the zero account"
@@ -164,7 +164,7 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
      */
     function setVisionToken(
         address visionToken
-    ) external whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    ) external whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE) {
         require(
             visionToken != address(0),
             "VisionForwarder: VisionToken must not be the zero account"
@@ -185,7 +185,7 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
      */
     function setMinimumValidatorNodeSignatures(
         uint256 minimumValidatorNodeSignatures
-    ) external whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    ) external whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE) {
         require(
             minimumValidatorNodeSignatures > 0,
             "VisionForwarder: at least one signature required"
@@ -206,7 +206,7 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
      */
     function addValidatorNode(
         address validatorNodeAddress
-    ) external whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    ) external whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE) {
         require(
             validatorNodeAddress != address(0),
             "VisionForwarder: validator node address must not be zero"
@@ -242,7 +242,7 @@ contract VisionForwarder is IVisionForwarder, EIP712, Pausable, VisionRBAC {
      */
     function removeValidatorNode(
         address validatorNodeAddress
-    ) external whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    ) external whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE) {
         require(
             validatorNodeAddress != address(0),
             "VisionForwarder: validator node address must not be zero"

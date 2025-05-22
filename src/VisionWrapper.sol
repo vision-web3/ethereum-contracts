@@ -78,7 +78,7 @@ abstract contract VisionWrapper is
     /**
      * @dev See {Pausable-_pause).
      */
-    function pause() external whenNotPaused onlyRole(VisionRoles.PAUSER) {
+    function pause() external whenNotPaused onlyRole(VisionRoles.PAUSER_ROLE) {
         _pause();
     }
 
@@ -88,7 +88,7 @@ abstract contract VisionWrapper is
     function unpause()
         external
         whenPaused
-        onlyRole(VisionRoles.SUPER_CRITICAL_OPS)
+        onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE)
     {
         require(
             getVisionForwarder() != address(0),
