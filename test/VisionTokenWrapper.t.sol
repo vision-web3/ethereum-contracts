@@ -330,11 +330,10 @@ contract VisionTokenWrapperTest is VisionBaseTest {
 
     function test_supportsInterface() external virtual {
         initializeVisionTokenWrapper();
-        bytes4[4] memory interfaceIds = [
+        bytes4[3] memory interfaceIds = [
             bytes4(0x01ffc9a7),
             type(IVisionWrapper).interfaceId,
-            type(ERC20).interfaceId,
-            type(ERC20Pausable).interfaceId
+            type(IVisionToken).interfaceId
         ];
         for (uint256 i = 0; i < interfaceIds.length; i++) {
             bytes4 interfaceId = interfaceIds[i];

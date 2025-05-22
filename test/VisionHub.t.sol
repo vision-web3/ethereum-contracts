@@ -17,6 +17,8 @@ import {VisionHubDeployer} from "./VisionHubDeployer.t.sol";
 contract VisionHubTest is VisionHubDeployer {
     address constant PANDAS_TOKEN_OWNER =
         address(uint160(uint256(keccak256("PandasTokenOwner"))));
+    address constant VISION_TOKEN_OWNER =
+        address(uint160(uint256(keccak256("VisionTokenOwner"))));
     AccessController public accessController;
 
     bytes32 constant DUMMY_COMMIT_HASH = keccak256("commit");
@@ -1138,7 +1140,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_registerToken_WhenTokenAlreadyRegistered() external {
-        registerToken();
+        registerTokens();
         vm.expectRevert("VisionHub: token must not be active");
 
         vm.prank(PANDAS_TOKEN_OWNER);
@@ -1156,6 +1158,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_unregisterToken() external {
+        registerToken(VISION_TOKEN_ADDRESS, VISION_TOKEN_OWNER);
         registerTokenAndExternalToken(PANDAS_TOKEN_OWNER);
         mockPandasToken_getOwner(PANDAS_TOKEN_ADDRESS, PANDAS_TOKEN_OWNER);
         vm.expectEmit();
@@ -1186,6 +1189,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_unregisterToken_BySuperCriticalOps() external {
+        registerToken(VISION_TOKEN_ADDRESS, VISION_TOKEN_OWNER);
         registerTokenAndExternalToken(SUPER_CRITICAL_OPS);
         mockPandasToken_getOwner(PANDAS_TOKEN_ADDRESS, SUPER_CRITICAL_OPS);
         vm.expectEmit();
@@ -1216,6 +1220,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_unregisterToken_BySuperCriticalOpsWhenPaused() external {
+        registerToken(VISION_TOKEN_ADDRESS, VISION_TOKEN_OWNER);
         registerTokenAndExternalToken(SUPER_CRITICAL_OPS);
 
         vm.prank(PAUSER);
@@ -1286,7 +1291,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_unregisterToken_WhenTokenAlreadyUnRegistered() external {
-        registerToken();
+        registerTokens();
         mockPandasToken_getOwner(PANDAS_TOKEN_ADDRESS, PANDAS_TOKEN_OWNER);
 
         vm.startPrank(PANDAS_TOKEN_OWNER);
@@ -1327,7 +1332,7 @@ contract VisionHubTest is VisionHubDeployer {
         visionHubProxy.unregisterToken(PANDAS_TOKEN_ADDRESS);
     }
     function test_unregisterToken_ByNonTokenOwner() external {
-        registerToken();
+        registerTokens();
         mockPandasToken_getOwner(PANDAS_TOKEN_ADDRESS, address(123));
 
         vm.expectRevert("VisionHub: caller is not the token owner");
@@ -1385,7 +1390,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_registerExternalToken() external {
-        registerToken();
+        registerTokens();
 
         vm.prank(PANDAS_TOKEN_OWNER);
         visionHubProxy.registerExternalToken(
@@ -1554,7 +1559,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_registerExternalToken_ByNonTokenOwner() external {
-        registerToken();
+        registerTokens();
         vm.mockCall(
             PANDAS_TOKEN_ADDRESS,
             abi.encodeWithSelector(VisionBaseToken.getOwner.selector),
@@ -1757,7 +1762,7 @@ contract VisionHubTest is VisionHubDeployer {
     function test_unregisterExternalToken_WithInactiveExternalToken()
         external
     {
-        registerToken();
+        registerTokens();
         vm.expectRevert("VisionHub: external token must be active");
 
         vm.prank(PANDAS_TOKEN_OWNER);
@@ -2810,7 +2815,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_transfer() external {
-        registerToken();
+        registerTokens();
         registerServiceNode();
         mockPandasToken_getVisionForwarder(
             PANDAS_TOKEN_ADDRESS,
@@ -2845,7 +2850,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_transfer_PandasTokenFailure() external {
-        registerToken();
+        registerTokens();
         registerServiceNode();
         mockPandasToken_getVisionForwarder(
             PANDAS_TOKEN_ADDRESS,
@@ -3175,7 +3180,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_verifyTransfer() external {
-        registerToken();
+        registerTokens();
         registerServiceNode();
         mockPandasToken_getVisionForwarder(
             PANDAS_TOKEN_ADDRESS,
@@ -3209,7 +3214,7 @@ contract VisionHubTest is VisionHubDeployer {
     function test_verifyTransfer_WhenTokenHasNotSetTheRightForwarder()
         external
     {
-        registerToken();
+        registerTokens();
         mockPandasToken_getVisionForwarder(PANDAS_TOKEN_ADDRESS, address(123));
         vm.expectRevert(
             "VisionHub: Forwarder of Hub and transferred token must match"
@@ -3219,7 +3224,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_verifyTransfer_WhenServiceNodeIsNotRegistered() external {
-        registerToken();
+        registerTokens();
         mockPandasToken_getVisionForwarder(
             PANDAS_TOKEN_ADDRESS,
             VISION_FORWARDER_ADDRESS
@@ -3232,7 +3237,7 @@ contract VisionHubTest is VisionHubDeployer {
     function test_verifyTransfer_WhenServiceNodeHasNotEnoughDeposit()
         external
     {
-        registerToken();
+        registerTokens();
         registerServiceNode();
         mockPandasToken_getVisionForwarder(
             PANDAS_TOKEN_ADDRESS,
@@ -3252,7 +3257,7 @@ contract VisionHubTest is VisionHubDeployer {
     function test_verifyTransfer_WithPAN_WhenInsufficientPANbalance()
         external
     {
-        registerToken();
+        registerTokens();
         registerServiceNode();
         VisionTypes.TransferRequest
             memory transferRequest_ = transferRequest();
@@ -3279,7 +3284,7 @@ contract VisionHubTest is VisionHubDeployer {
     function test_verifyTransfer_WithPANDAS_WhenInsufficientPANbalance()
         external
     {
-        registerToken();
+        registerTokens();
         registerServiceNode();
         mockPandasToken_getVisionForwarder(
             PANDAS_TOKEN_ADDRESS,
@@ -3310,7 +3315,7 @@ contract VisionHubTest is VisionHubDeployer {
     function test_verifyTransfer_WithPANDAS_WhenInsufficientPANDASbalance()
         external
     {
-        registerToken();
+        registerTokens();
         registerServiceNode();
         mockPandasToken_getVisionForwarder(
             PANDAS_TOKEN_ADDRESS,
@@ -3391,7 +3396,7 @@ contract VisionHubTest is VisionHubDeployer {
     function test_verifyTransferFrom_WithNotRegisteredExternalToken()
         external
     {
-        registerToken();
+        registerTokens();
         registerServiceNode();
         mockPandasToken_getVisionForwarder(
             PANDAS_TOKEN_ADDRESS,
@@ -3594,6 +3599,7 @@ contract VisionHubTest is VisionHubDeployer {
 
     function test_getTokens_WhenOnlyVisionTokenRegistered() external {
         initializeVisionHub();
+        registerToken(VISION_TOKEN_ADDRESS, VISION_TOKEN_OWNER);
 
         address[] memory tokens = visionHubProxy.getTokens();
 
@@ -3602,7 +3608,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_getTokens_WhenPandasTokenRegistered() external {
-        registerToken();
+        registerTokens();
 
         address[] memory tokens = visionHubProxy.getTokens();
 
@@ -3612,7 +3618,7 @@ contract VisionHubTest is VisionHubDeployer {
     }
 
     function test_getTokenRecord_WhenTokenRegistered() external {
-        registerToken();
+        registerTokens();
 
         VisionTypes.TokenRecord memory tokenRecord = visionHubProxy
             .getTokenRecord(PANDAS_TOKEN_ADDRESS);
@@ -3923,7 +3929,8 @@ contract VisionHubTest is VisionHubDeployer {
         visionHubProxy.registerToken(tokenAddress);
     }
 
-    function registerToken() public {
+    function registerTokens() public {
+        registerToken(VISION_TOKEN_ADDRESS, VISION_TOKEN_OWNER);
         registerToken(PANDAS_TOKEN_ADDRESS, PANDAS_TOKEN_OWNER);
     }
 

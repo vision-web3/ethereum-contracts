@@ -143,9 +143,9 @@ contract GasDrainingContract is
     }
 
     function visionTransfer(
-        address _sender,
-        address _recipient,
-        uint256 _amount
+        address /* _sender */,
+        address /* _recipient */,
+        uint256 /* _amount */
     ) public override onlyVisionForwarder {
         assembly {
             invalid()
@@ -153,8 +153,8 @@ contract GasDrainingContract is
     }
 
     function visionTransferFrom(
-        address sender,
-        uint256 amount
+        address /* sender */,
+        uint256 /* amount */
     ) public override onlyVisionForwarder {
         assembly {
             invalid()

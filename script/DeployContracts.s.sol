@@ -71,7 +71,7 @@ contract DeployContracts is
     VisionWrapper[] visionWrappers;
     VisionTokenMigrator visionTokenMigrator;
 
-    function deploy(uint256 vsnSupply, uint256 bestSupply) public {
+    function deploy() public {
         vm.startBroadcast();
         readRoleAddresses();
         address pauser = getRoleAddress(Role.PAUSER);
@@ -87,12 +87,8 @@ contract DeployContracts is
         (visionHubProxy, visionHubInit, visionFacets) = deployVisionHub(
             accessController
         );
-        visionToken = deployVisionToken(vsnSupply, accessController);
+
         visionForwarder = deployVisionForwarder(accessController);
-        bitpandaEcosystemToken = deployBitpandaEcosystemToken(
-            bestSupply,
-            accessController
-        );
         visionWrappers = deployCoinWrappers(accessController);
         vm.stopBroadcast();
 
@@ -132,7 +128,6 @@ contract DeployContracts is
         IVisionHub visionHub = IVisionHub(address(visionHubProxy));
 
         vm.startBroadcast(accessController.superCriticalOps());
-        initializeVisionToken(visionToken, visionForwarder);
         initializeVisionHub(
             visionHub,
             visionForwarder,
@@ -157,11 +152,6 @@ contract DeployContracts is
             minimumValidatorNodeSignatures,
             validatorNodeAddresses
         );
-        initializeBitpandaEcosystemToken(
-            bitpandaEcosystemToken,
-            visionHub,
-            visionForwarder
-        );
         initializeVisionWrappers(visionHub, visionForwarder, visionWrappers);
         vm.stopBroadcast();
         writeAllSafeInfo(accessController);
@@ -171,8 +161,8 @@ contract DeployContracts is
         bool isMigratorIncludedInExport
     ) internal {
         uint256 length = isMigratorIncludedInExport
-            ? 11 + visionWrappers.length
-            : 10 + visionWrappers.length;
+            ? 10 + visionWrappers.length
+            : 9 + visionWrappers.length;
         ContractAddress[] memory contractAddresses = new ContractAddress[](
             length
         );
@@ -212,12 +202,8 @@ contract DeployContracts is
             Contract.VSN,
             address(visionToken)
         );
-        contractAddresses[9] = ContractAddress(
-            Contract.BEST,
-            address(bitpandaEcosystemToken)
-        );
         for (uint i; i < visionWrappers.length; i++) {
-            contractAddresses[i + 10] = ContractAddress(
+            contractAddresses[i + 9] = ContractAddress(
                 _keysToContracts[visionWrappers[i].symbol()],
                 address(visionWrappers[i])
             );
@@ -261,9 +247,6 @@ contract DeployContracts is
             getContractAddress(Contract.FORWARDER, false)
         );
         visionToken = VisionToken(getContractAddress(Contract.VSN, false));
-        bitpandaEcosystemToken = BitpandaEcosystemToken(
-            getContractAddress(Contract.BEST, false)
-        );
         visionWrappers = new VisionWrapper[](7);
         visionWrappers[0] = VisionWrapper(
             getContractAddress(Contract.VSN_AVAX, false)
