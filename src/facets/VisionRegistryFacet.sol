@@ -30,7 +30,12 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
      */
     function setCommitmentWaitPeriod(
         uint256 commitmentWaitPeriod
-    ) external override whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    )
+        external
+        override
+        whenPaused
+        onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE)
+    {
         s.commitmentWaitPeriod = commitmentWaitPeriod;
         emit CommitmentWaitPeriodUpdated(commitmentWaitPeriod);
     }
@@ -54,7 +59,7 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
         external
         override
         whenNotPaused
-        onlyRole(VisionRoles.PAUSER)
+        onlyRole(VisionRoles.PAUSER_ROLE)
     {
         s.paused = true;
         emit Paused(msg.sender);
@@ -68,7 +73,7 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
         external
         override
         whenPaused
-        onlyRole(VisionRoles.SUPER_CRITICAL_OPS)
+        onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE)
     {
         require(
             s.visionForwarder != address(0),
@@ -96,7 +101,12 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
     // slither-disable-next-line timestamp
     function setVisionForwarder(
         address visionForwarder
-    ) external override whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    )
+        external
+        override
+        whenPaused
+        onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE)
+    {
         require(
             visionForwarder != address(0),
             "VisionHub: VisionForwarder must not be the zero account"
@@ -111,7 +121,12 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
     // slither-disable-next-line timestamp
     function setVisionToken(
         address visionToken
-    ) external override whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    )
+        external
+        override
+        whenPaused
+        onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE)
+    {
         require(
             visionToken != address(0),
             "VisionHub: VisionToken must not be the zero account"
@@ -130,7 +145,12 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
      */
     function setPrimaryValidatorNode(
         address primaryValidatorNodeAddress
-    ) external override whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    )
+        external
+        override
+        whenPaused
+        onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE)
+    {
         require(
             primaryValidatorNodeAddress != address(0),
             "VisionHub: primary validator node address must not be zero"
@@ -144,7 +164,12 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
      */
     function setProtocolVersion(
         bytes32 protocolVersion
-    ) external override whenPaused onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    )
+        external
+        override
+        whenPaused
+        onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE)
+    {
         require(
             protocolVersion != bytes32(0),
             "VisionHub: protocol version must not be zero"
@@ -160,7 +185,7 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
         uint256 blockchainId,
         string calldata name,
         uint256 validatorFeeFactor
-    ) external override onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    ) external override onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE) {
         require(
             bytes(name).length > 0,
             "VisionHub: blockchain name must not be empty"
@@ -189,7 +214,7 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
     // slither-disable-next-line timestamp
     function unregisterBlockchain(
         uint256 blockchainId
-    ) external override onlyRole(VisionRoles.SUPER_CRITICAL_OPS) {
+    ) external override onlyRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE) {
         // Validate the input parameter
         require(
             blockchainId != s.currentBlockchainId,
@@ -220,7 +245,12 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
     function updateBlockchainName(
         uint256 blockchainId,
         string calldata name
-    ) external override whenPaused onlyRole(VisionRoles.MEDIUM_CRITICAL_OPS) {
+    )
+        external
+        override
+        whenPaused
+        onlyRole(VisionRoles.MEDIUM_CRITICAL_OPS_ROLE)
+    {
         // Validate the input parameters
         require(
             bytes(name).length > 0,
@@ -246,7 +276,7 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
     function initiateValidatorFeeFactorUpdate(
         uint256 blockchainId,
         uint256 newValidatorFeeFactor
-    ) external override onlyRole(VisionRoles.MEDIUM_CRITICAL_OPS) {
+    ) external override onlyRole(VisionRoles.MEDIUM_CRITICAL_OPS_ROLE) {
         require(
             newValidatorFeeFactor >= 1,
             "VisionHub: new validator fee factor must be >= 1"
@@ -294,7 +324,7 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
      */
     function initiateUnbondingPeriodServiceNodeDepositUpdate(
         uint256 newUnbondingPeriodServiceNodeDeposit
-    ) external override onlyRole(VisionRoles.MEDIUM_CRITICAL_OPS) {
+    ) external override onlyRole(VisionRoles.MEDIUM_CRITICAL_OPS_ROLE) {
         _initiateUpdatableUint256Update(
             s.unbondingPeriodServiceNodeDeposit,
             newUnbondingPeriodServiceNodeDeposit
@@ -324,7 +354,7 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
      */
     function initiateMinimumServiceNodeDepositUpdate(
         uint256 newMinimumServiceNodeDeposit
-    ) external override onlyRole(VisionRoles.MEDIUM_CRITICAL_OPS) {
+    ) external override onlyRole(VisionRoles.MEDIUM_CRITICAL_OPS_ROLE) {
         _initiateUpdatableUint256Update(
             s.minimumServiceNodeDeposit,
             newMinimumServiceNodeDeposit
@@ -350,7 +380,7 @@ contract VisionRegistryFacet is IVisionRegistry, VisionBaseFacet {
      */
     function initiateParameterUpdateDelayUpdate(
         uint256 newParameterUpdateDelay
-    ) external override onlyRole(VisionRoles.MEDIUM_CRITICAL_OPS) {
+    ) external override onlyRole(VisionRoles.MEDIUM_CRITICAL_OPS_ROLE) {
         _initiateUpdatableUint256Update(
             s.parameterUpdateDelay,
             newParameterUpdateDelay

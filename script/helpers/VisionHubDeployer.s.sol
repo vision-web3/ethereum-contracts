@@ -91,7 +91,7 @@ abstract contract VisionHubDeployer is VisionBaseScript {
         return (visionHubDiamond, visionHubInit, visionFacets);
     }
 
-    // VisionRoles.DEPLOYER
+    // VisionRoles.DEPLOYER_ROLE
     function diamondCutFacets(
         VisionHubProxy visionHubProxy,
         VisionHubInit visionHubInit,
@@ -170,7 +170,7 @@ abstract contract VisionHubDeployer is VisionBaseScript {
         return initializerData;
     }
 
-    // VisionRoles.SUPER_CRITICAL_OPS  and expects VisionHub is paused
+    // VisionRoles.SUPER_CRITICAL_OPS_ROLE  and expects VisionHub is paused
     function initializeVisionHub(
         IVisionHub visionHub,
         VisionForwarder visionForwarder,
@@ -341,7 +341,7 @@ abstract contract VisionHubDeployer is VisionBaseScript {
         console.log("VisionHub initialized; paused=%s", visionHub.paused());
     }
 
-    // VisionRoles.DEPLOYER and expects VisionHub is paused already
+    // VisionRoles.DEPLOYER_ROLE and expects VisionHub is paused already
     function diamondCutUpgradeFacets(
         address visionHubProxyAddress,
         VisionRegistryFacet registryFacet,
