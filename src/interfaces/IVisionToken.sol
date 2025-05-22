@@ -2,10 +2,9 @@
 // slither-disable-next-line solc-version
 pragma solidity 0.8.26;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-
-import {IBEP20} from "./IBEP20.sol";
+import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 
 /**
  * @title Vision token interface
@@ -14,7 +13,7 @@ import {IBEP20} from "./IBEP20.sol";
  * contracts, containing functions which are expected by the Vision
  * multi-blockchain system.
  */
-interface IVisionToken is IERC20, IBEP20, IERC165 {
+interface IVisionToken is IERC20Metadata, IERC20Permit, IERC165 {
     event VisionForwarderSet(address visionForwarder);
 
     event VisionForwarderUnset();
@@ -78,4 +77,9 @@ interface IVisionToken is IERC20, IBEP20, IERC165 {
      *
      */
     function getVisionForwarder() external view returns (address);
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function getOwner() external view returns (address);
 }

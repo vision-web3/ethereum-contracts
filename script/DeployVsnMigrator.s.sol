@@ -52,7 +52,11 @@ contract DeployVsnMigrator is
         );
         visionToken = deployVisionToken(
             IERC20(oldTokenAddress).totalSupply(),
-            accessController
+            superCriticalOps,
+            superCriticalOps,
+            superCriticalOps,
+            superCriticalOps,
+            superCriticalOps
         );
         visionTokenMigrator = deployVisionTokenMigrator(
             oldTokenAddress,

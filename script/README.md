@@ -92,9 +92,22 @@ $ forge script ./script/DeployPanMigrator.s.sol --account local_deployer --passw
 ### DeployContracts
 
 Deploy all contracts from any gas paying account (on chains where the old PAN does not exist)
+Note: This does not deploys Vision Token. Deployment of Vision Token is done by a separate script [VisionTokenStandalone](#visiontokenstandalone)
+
+Order of deployment and configuration should be 
+1. Deploy vision Token using VisionTokenStandalone.deploy
+2. Deploy all hub contracts using DeployContracts.deploy
+3. Pause Vision Token using VisionTokenStandalone.pause
+4. Set Forwarder at Vision Token using VisionTokenStandalone.setVisionForwarder
+5. Configure Vision hub and other related contracts using DeployContracts.roleActions
+6. register Vision Token at VisionHub using VisionTokenStandalone.registerTokenAtVisionHub
+
+Above needs to be repeated for all chains and once done
+1. Register external VisionTokens on all chains using VisionTokenStandalone.registerVisionInHub
+2. Registering other external tokens at hub using RegisterExternalTokens.roleActions
 
 ```bash
-$ forge script ./script/DeployContracts.s.sol --account local_deployer --password '' --rpc-url local-8545 -vvvv --sig "deploy(uint256,uint256)" 100000000000000000 100000000000000000
+$ forge script ./script/DeployContracts.s.sol --account local_deployer --password '' --rpc-url local-8545 -vvvv --sig "deploy()"
 ```
 
 Deploy the remaining contracts from any gas paying account (on chains where the old PAN, new PAN, Access Controller, and the PAN migrator exist)
@@ -114,7 +127,7 @@ $ forge script ./script/DeployContracts.s.sol --rpc-url local-8545 -vvvv --sig "
 With multiple validators
 
 ```bash
-$ forge script ./script/DeployContracts.s.sol --rpc-url local-8545 -vvvv --sig "roleActions(uint256,uint256,address,address[])" 0 3 0x88CE2c1d82328f84Dd197f63482A3B68E18cD707 [0xAa1ea8611639537A89Cb5925903Fd1fb28027DE9,0xBB2166dC315dC02F314597eCf867C3dfB45ED205,0xCC0DF974953820B649Bb67F167f01cd265Ea5B0A]
+$ forge script ./script/DeployContracts.s.sol --rpc-url local-8545 -vvvv --sig "roleActions(uint256,uint256,uint256,address,address[])" 0 100 3 0x88CE2c1d82328f84Dd197f63482A3B68E18cD707 [0xAa1ea8611639537A89Cb5925903Fd1fb28027DE9,0xBB2166dC315dC02F314597eCf867C3dfB45ED205,0xCC0DF974953820B649Bb67F167f01cd265Ea5B0A]
 ```
 
 ### SubmitSafeTxs
@@ -271,4 +284,50 @@ RoleActions for all redeployed contracts (simulation only!)
 
 ```bash
 forge script ./script/redeploy/UpgradeHubAndRedeployForwarder.s.sol --rpc-url local-8545 -vvvv --sig "roleActions()"
+```
+
+
+### VisionTokenStandalone
+
+Deploy token logic and proxy
+Can be deployed by any gas paying account, but need to pass all the role account correctly
+
+```bash
+forge script ./script/VisionTokenStandalone.s.sol   --account local_deployer   --password ''   --rpc-url local-8545   -vvvv   --sig "deploy(uint256,address,address,address,address,address)" 999999999999999 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266   0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266   0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266   0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+```
+
+pause token:
+Can be only called by pauser account
+```bash
+forge script ./script/DeployVisionTokenStandalone.s.sol   --account local_deployer   --password ''   --rpc-url local-8545   -vvvv   --sig "pause(address)" 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 
+```
+
+
+setVisionForwarder
+Can be only called by criticalOps account
+```bash
+forge script ./script/DeployVisionTokenStandalone.s.sol   --account local_deployer   --password ''   --rpc-url local-8545   -vvvv   --sig "setVisionForwarder(address, address)" 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0599
+```
+
+registerTokenAtVisionHub
+can be done by criticalOps account of vision Token
+
+```bash
+forge script ./script/DeployVisionTokenStandalone.s.sol   --account local_deployer   --password ''   --rpc-url local-8545   -vvvv   --sig "registerTokenAtVisionHub(address, address)" 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 0xb121725E7734CE288F8367e1Bb143E90bb3F0599
+```
+
+
+Upgrade Vision Token 
+1. deploy new logic contract of Vision token
+Can be called by any gas paying account
+```bash
+forge script ./script/VisionTokenStandalone.s.sol   --account local_deployer   --password ''   --rpc-url local-8545   -vvvv   --sig "deployNewVisionTokenLogic()"
+```
+
+
+
+2. call upgradeToAndCall() on VisionToken proxy using following 
+Can be only called by upgrader account
+```bash
+forge script ./script/VisionTokenStandalone.s.sol   --account local_deployer   --password ''   --rpc-url local-8545   -vvvv   --sig "upgradeToAndCallVisionToken(address,address)" 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0  --broadcast
 ```

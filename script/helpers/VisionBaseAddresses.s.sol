@@ -33,7 +33,6 @@ abstract contract VisionBaseAddresses is VisionBaseScript {
         TRANSFER_FACET,
         FORWARDER,
         ACCESS_CONTROLLER,
-        BEST,
         VSN,
         VSN_MIGRATOR,
         VSN_AVAX,
@@ -277,9 +276,6 @@ abstract contract VisionBaseAddresses is VisionBaseScript {
                     Contract.ACCESS_CONTROLLER
                 ] = _getAccessControllerContractInfo();
                 _otherChaincontractInfo[blockchainId][
-                    Contract.BEST
-                ] = _getBestContractInfo();
-                _otherChaincontractInfo[blockchainId][
                     Contract.VSN
                 ] = _getVsnContractInfo();
                 _otherChaincontractInfo[blockchainId][
@@ -345,10 +341,6 @@ abstract contract VisionBaseAddresses is VisionBaseScript {
             Contract.ACCESS_CONTROLLER
         ] = CurrentChainContractInfo(
             _getAccessControllerContractInfo(),
-            address(0)
-        );
-        _currentChainContractInfo[Contract.BEST] = CurrentChainContractInfo(
-            _getBestContractInfo(),
             address(0)
         );
         _currentChainContractInfo[Contract.VSN] = CurrentChainContractInfo(
@@ -496,19 +488,6 @@ abstract contract VisionBaseAddresses is VisionBaseScript {
             false
         );
         return accessControllerContractInfo;
-    }
-
-    function _getBestContractInfo()
-        private
-        pure
-        returns (ContractInfo memory)
-    {
-        ContractInfo memory bestContractInfo = ContractInfo(
-            "best",
-            address(0),
-            true
-        );
-        return bestContractInfo;
     }
 
     function _getVsnContractInfo() private pure returns (ContractInfo memory) {
