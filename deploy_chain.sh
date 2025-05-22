@@ -240,6 +240,20 @@ register_tokens() {
         sleep 1
     done
 
+    ACCESS_CONTROLLER_ADDRESS=$(jq -r '.access_controller' "$ROOT_DIR/$chain.json")
+    echo "ACCESS_CONTROLLER_ADDRESS --- $ACCESS_CONTROLLER_ADDRESS"
+
+    forge script "$ROOT_DIR/script/RegisterExternalVisionTokens.s.sol" --chain-id $chain_id \
+        --rpc-url http://127.0.0.1:$port  --sig "registerVisionInHub(address)" "$HUB_PROXY_ADDRESS" \
+        --account vsn_critical_ops --password '' --broadcast
+
+    echo "Waiting for the state to change for $chain..."
+
+    # While the state is the same, keep waiting
+    while [ $(sha256sum "$ROOT_DIR/anvil-state-$chain.json" | cut -d ' ' -f 1) = $HASH ]; do
+        sleep 1
+    done
+
     cp "$ROOT_DIR/anvil-state-$chain.json" "$chain_dir/anvil-state-$chain.json"
 
     for contract_folder in /root/broadcast/*; do
