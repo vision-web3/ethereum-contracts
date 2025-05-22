@@ -50,7 +50,6 @@ contract DeployVsnMigrator is
             mediumCriticalOps,
             superCriticalOps
         );
-        // FIXME move vsn out and take it as input param
         visionToken = deployVisionToken(
             IERC20(oldTokenAddress).totalSupply(),
             superCriticalOps,
