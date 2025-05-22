@@ -240,9 +240,6 @@ register_tokens() {
         sleep 1
     done
 
-    ACCESS_CONTROLLER_ADDRESS=$(jq -r '.access_controller' "$ROOT_DIR/$chain.json")
-    echo "ACCESS_CONTROLLER_ADDRESS --- $ACCESS_CONTROLLER_ADDRESS"
-
     forge script "$ROOT_DIR/script/RegisterExternalVisionTokens.s.sol" --chain-id $chain_id \
         --rpc-url http://127.0.0.1:$port  --sig "registerVisionInHub(address)" "$HUB_PROXY_ADDRESS" \
         --account vsn_critical_ops --password '' --broadcast
