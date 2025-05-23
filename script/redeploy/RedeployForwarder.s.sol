@@ -28,7 +28,6 @@ import {SafeAddresses} from "../helpers/SafeAddresses.s.sol";
  * 2. Retrieve the Vision token address from the Vision Hub and
  * configure it in the new Vision Forwarder.
  * 3. Configure the new Vision Forwarder at the Vision Hub.
- * 4. Configure the new Vision Forwarder at Vision, Best and Wrapper tokens.
  *
  * @dev Usage
  * 1. Deploy by any gas paying account:
@@ -91,15 +90,6 @@ contract RedeployForwarder is
         migrateForwarderAtHub(newVisionForwarder, visionHub);
         vm.stopBroadcast();
 
-        // migrate new Forwarder at tokens
-        for (uint256 i = 0; i < tokens.length; i++) {
-            vm.broadcast(accessController.pauser());
-            tokens[i].pause();
-
-            vm.startBroadcast(accessController.superCriticalOps());
-            migrateNewForwarderAtToken(newVisionForwarder, tokens[i]);
-            vm.stopBroadcast();
-        }
         // update json with new forwarder
         overrideWithRedeployedAddresses();
         writeAllSafeInfo(accessController);

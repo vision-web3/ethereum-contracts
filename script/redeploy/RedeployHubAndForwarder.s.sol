@@ -38,7 +38,6 @@ import {SafeAddresses} from "../helpers/SafeAddresses.s.sol";
  * configure it in the new Vision Hub and the Vision Forwarder.
  * 4. Configure the new Vision Hub at the Vision Forwarder.
  * 5. Configure the new Vision Forwarder at the Vision Hub.
- * 5. Configure the new Vision Forwarder at Vision, Best and Wrapper tokens.
  * 6. Migrate the tokens owned by the sender account from the old Vision Hub
  * to the new one.
  *
@@ -137,15 +136,6 @@ contract RedeployHubAndForwarder is
         // Migrate
         vm.broadcast(accessController.superCriticalOps());
         migrateTokensFromOldHubToNewHub(newVisionHub);
-
-        // migrate new Forwarder at tokens
-        for (uint256 i = 0; i < tokens.length; i++) {
-            vm.startBroadcast(accessController.pauser());
-            tokens[i].pause();
-
-            vm.broadcast(accessController.superCriticalOps());
-            migrateNewForwarderAtToken(newVisionForwarder, tokens[i]);
-        }
 
         overrideWithRedeployedAddresses();
         writeAllSafeInfo(accessController);
