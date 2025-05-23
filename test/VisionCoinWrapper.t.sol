@@ -16,7 +16,6 @@ contract VisionCoinWrapperTest is VisionBaseTest {
     VisionCoinWrapper visionCoinWrapper;
     address constant VISION_FORWARDER_ADDRESS =
         address(uint160(uint256(keccak256("VisionForwarderAddress"))));
-    uint256 constant WRAPPED_AMOUNT = 1000;
     string constant NAME = "test token";
     string constant SYMBOL = "TEST";
     uint8 constant DECIMALS = 18;
@@ -34,16 +33,16 @@ contract VisionCoinWrapperTest is VisionBaseTest {
         );
     }
 
-    function test_wrap() external {
+    function test_wrap(uint64 wrapped_amount) external {
         initializeVisionCoinWrapper();
         uint256 initialBalance = deployer().balance;
         vm.expectEmit();
-        emit IERC20.Transfer(ADDRESS_ZERO, deployer(), WRAPPED_AMOUNT);
+        emit IERC20.Transfer(ADDRESS_ZERO, deployer(), wrapped_amount);
 
-        visionCoinWrapper.wrap{value: WRAPPED_AMOUNT}();
+        visionCoinWrapper.wrap{value: wrapped_amount}();
 
-        assertEq(visionCoinWrapper.balanceOf(deployer()), WRAPPED_AMOUNT);
-        assertEq(deployer().balance, initialBalance - WRAPPED_AMOUNT);
+        assertEq(visionCoinWrapper.balanceOf(deployer()), wrapped_amount);
+        assertEq(deployer().balance, initialBalance - wrapped_amount);
     }
 
     function test_wrap_WhenPaused() external {
@@ -76,16 +75,16 @@ contract VisionCoinWrapperTest is VisionBaseTest {
         onlyNativeTest(address(visionCoinWrapper_), calldata_);
     }
 
-    function test_unwrap() external {
-        wrap(WRAPPED_AMOUNT);
+    function test_unwrap(uint64 wrapped_amount) external {
+        wrap(wrapped_amount);
         uint256 initialBalance = deployer().balance;
         vm.expectEmit();
-        emit IERC20.Transfer(deployer(), ADDRESS_ZERO, WRAPPED_AMOUNT);
+        emit IERC20.Transfer(deployer(), ADDRESS_ZERO, wrapped_amount);
 
-        visionCoinWrapper.unwrap(WRAPPED_AMOUNT);
+        visionCoinWrapper.unwrap(wrapped_amount);
 
         assertEq(visionCoinWrapper.balanceOf(deployer()), 0);
-        assertEq(deployer().balance, initialBalance + WRAPPED_AMOUNT);
+        assertEq(deployer().balance, initialBalance + wrapped_amount);
     }
 
     function test_unwrap_WhenPaused() external {
@@ -119,17 +118,17 @@ contract VisionCoinWrapperTest is VisionBaseTest {
         onlyNativeTest(address(visionCoinWrapper_), calldata_);
     }
 
-    function test_unwrap_TransferFailed() external {
+    function test_unwrap_TransferFailed(uint64 wrapped_amount) external {
         initializeVisionCoinWrapper();
         FailingContract failingContract = new FailingContract();
-        vm.deal(address(failingContract), 1 ether);
+        vm.deal(address(failingContract), 100 ether);
         vm.startPrank(address(failingContract));
-        visionCoinWrapper.wrap{value: WRAPPED_AMOUNT}();
+        visionCoinWrapper.wrap{value: wrapped_amount}();
         vm.expectRevert(
             abi.encodePacked("VisionCoinWrapper: transfer failed")
         );
 
-        visionCoinWrapper.unwrap(WRAPPED_AMOUNT);
+        visionCoinWrapper.unwrap(wrapped_amount);
         vm.stopPrank();
     }
 

@@ -30,7 +30,7 @@ abstract contract VisionBaseFacet {
                 storage acs = LibAccessControl.accessControlStorage();
             require(
                 acs.accessController.hasRole(
-                    VisionRoles.SUPER_CRITICAL_OPS,
+                    VisionRoles.SUPER_CRITICAL_OPS_ROLE,
                     msg.sender
                 ),
                 "VisionHub: caller doesn't have role"

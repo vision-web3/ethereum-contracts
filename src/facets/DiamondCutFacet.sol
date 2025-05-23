@@ -24,7 +24,7 @@ contract DiamondCutFacet is IDiamondCut, VisionBaseFacet {
         FacetCut[] calldata diamondCut_,
         address init_,
         bytes calldata calldata_
-    ) external override onlyRole(VisionRoles.DEPLOYER) {
+    ) external override onlyRole(VisionRoles.DEPLOYER_ROLE) {
         LibDiamond.diamondCut(diamondCut_, init_, calldata_);
     }
 }
