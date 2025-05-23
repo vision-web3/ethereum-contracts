@@ -74,22 +74,4 @@ abstract contract VisionForwarderRedeployer is VisionForwarderDeployer {
             visionHub.paused()
         );
     }
-
-    function migrateNewForwarderAtToken(
-        VisionForwarder visionForwarder,
-        VisionWrapper token
-    ) public {
-        require(
-            token.paused(),
-            "Token should be paused before migrateNewForwarderAtToken"
-        );
-        token.setVisionForwarder(address(visionForwarder));
-        token.unpause();
-        console.log(
-            "%s setVisionForwarder(%s); paused=%s",
-            token.name(),
-            address(visionForwarder),
-            token.paused()
-        );
-    }
 }
