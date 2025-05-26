@@ -53,26 +53,25 @@ contract RegisterExternalVisionTokens is VisionBaseScript {
                 _visionTokenAddress,
                 uint256(otherBlockchain.blockchainId)
             );
+        string memory _externalVisionTokenAddressStringified = vm.toString(
+            _externalVisionTokenAddress);
         if (!externalTokenRecord.active) {
             visionHubProxy.registerExternalToken(
                 _visionTokenAddress,
                 uint256(otherBlockchain.blockchainId),
-                Strings.toHexString(
-                    uint256(uint160(_externalVisionTokenAddress)),
-                    20
-                )
+                _externalVisionTokenAddressStringified
             );
             console2.log(
                 "Vision externally registered on chain=%s; externalTokenAddress=%s",
                 otherBlockchain.name,
-                _externalVisionTokenAddress
+                _externalVisionTokenAddressStringified
             );
         } else {
             //  Check if already registered token matches with one in the json
             if (
                 keccak256(
                     abi.encodePacked(externalTokenRecord.externalToken)
-                ) != keccak256(abi.encodePacked(_externalVisionTokenAddress))
+                ) != keccak256(abi.encodePacked(_externalVisionTokenAddressStringified))
             ) {
                 console2.log(
                     "(Mismatch) Vision already registered; chain=%s ; externalToken=%s",
@@ -93,16 +92,13 @@ contract RegisterExternalVisionTokens is VisionBaseScript {
                 visionHubProxy.registerExternalToken(
                     _visionTokenAddress,
                     uint256(otherBlockchain.blockchainId),
-                    Strings.toHexString(
-                        uint256(uint160(_externalVisionTokenAddress)),
-                        20
-                    )
+                    _externalVisionTokenAddressStringified
                 );
                 console2.log(
                     "VisionHub.registerExternalToken(%s, %s, %s)",
                     _visionTokenAddress,
                     uint256(otherBlockchain.blockchainId),
-                    _externalVisionTokenAddress
+                    _externalVisionTokenAddressStringified
                 );
             } else {
                 console2.log(
