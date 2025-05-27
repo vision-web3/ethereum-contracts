@@ -233,23 +233,24 @@ register_tokens() {
     forge script "$ROOT_DIR/script/SubmitSafeTxs.s.sol" --account gas_payer --chain-id $chain_id \
         --password '' --rpc-url http://127.0.0.1:$port --sig "run()" --broadcast -vvv
 
-    echo "Waiting for the state to change for $chain..."
+    # echo "Waiting for the state to change for $chain..."
 
-    # While the state is the same, keep waiting
-    while [ $(sha256sum "$ROOT_DIR/anvil-state-$chain.json" | cut -d ' ' -f 1) = $HASH ]; do
-        sleep 1
-    done
+    # # While the state is the same, keep waiting
+    # while [ $(sha256sum "$ROOT_DIR/anvil-state-$chain.json" | cut -d ' ' -f 1) = $HASH ]; do
+    #     sleep 1
+    # done
+
+    HUB_PROXY_ADDRESS=$(jq -r '.hub_proxy' "$ROOT_DIR/$chain.json")
+    echo "HUB_PROXY_ADDRESS --- $HUB_PROXY_ADDRESS"
 
     forge script "$ROOT_DIR/script/RegisterExternalVisionTokens.s.sol" --chain-id $chain_id \
         --rpc-url http://127.0.0.1:$port  --sig "registerVisionInHub(address)" "$HUB_PROXY_ADDRESS" \
-        --account vsn_critical_ops --password '' --broadcast
+        --account vsn_critical_ops --password '' --slow --broadcast -vvvv
 
-    echo "Waiting for the state to change for $chain..."
+    echo "Forcing state save for $chain..."
+    cast rpc anvil_dumpState --rpc-url http://127.0.0.1:$port > "$ROOT_DIR/anvil-state-$chain.json"
 
-    # While the state is the same, keep waiting
-    while [ $(sha256sum "$ROOT_DIR/anvil-state-$chain.json" | cut -d ' ' -f 1) = $HASH ]; do
-        sleep 1
-    done
+    sleep 3
 
     cp "$ROOT_DIR/anvil-state-$chain.json" "$chain_dir/anvil-state-$chain.json"
 
