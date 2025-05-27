@@ -54,7 +54,8 @@ contract RegisterExternalVisionTokens is VisionBaseScript {
                 uint256(otherBlockchain.blockchainId)
             );
         string memory _externalVisionTokenAddressStringified = vm.toString(
-            _externalVisionTokenAddress);
+            _externalVisionTokenAddress
+        );
         if (!externalTokenRecord.active) {
             visionHubProxy.registerExternalToken(
                 _visionTokenAddress,
@@ -71,7 +72,10 @@ contract RegisterExternalVisionTokens is VisionBaseScript {
             if (
                 keccak256(
                     abi.encodePacked(externalTokenRecord.externalToken)
-                ) != keccak256(abi.encodePacked(_externalVisionTokenAddressStringified))
+                ) !=
+                keccak256(
+                    abi.encodePacked(_externalVisionTokenAddressStringified)
+                )
             ) {
                 console2.log(
                     "(Mismatch) Vision already registered; chain=%s ; externalToken=%s",
