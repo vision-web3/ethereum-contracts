@@ -196,7 +196,7 @@ jobs:
             --builder ${{ steps.buildx.outputs.name }} \
             --load'
 
-      - uses: vision-web3/e2e-testing/.github/actions/run-tests@main
+      - uses: vision-web3/e2e-testing/.github/actions/run-tests@test-timeout
         with:
           ethereum-contracts-path: ${{ env.VISION_ETHEREUM_CONTRACTS }}
           ethereum-contracts-version: 'local'

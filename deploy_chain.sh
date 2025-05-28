@@ -130,7 +130,7 @@ deploy_for_chain() {
     echo "Starting deployment for $chain (Chain ID: $chain_id, Port: $port)"
 
     # Start anvil in the background
-    anvil --port $port --chain-id $chain_id --state-interval 1 --dump-state "$ROOT_DIR/anvil-state-$chain.json" --config-out accounts --mnemonic "${MNEMONIC}" &
+    anvil --port $port --chain-id $chain_id --state-interval 1 --dump-state "$ROOT_DIR/anvil-state-$chain.json" --config-out accounts --mnemonic "${MNEMONIC}" > /dev/null 2>&1 &
     anvil_pids[$chain]=$!
 
     # Wait for anvil to be available
@@ -242,7 +242,7 @@ register_tokens() {
 
     forge script "$ROOT_DIR/script/RegisterExternalVisionTokens.s.sol" --chain-id $chain_id \
         --rpc-url http://127.0.0.1:$port  --sig "registerVisionInHub(address)" "$HUB_PROXY_ADDRESS" \
-        --account vsn_critical_ops --password '' --broadcast
+        --account vsn_critical_ops --password '' --broadcast -vvvv
 
     echo "Waiting for the state to change for $chain..."
 
@@ -250,6 +250,8 @@ register_tokens() {
     while [ $(sha256sum "$ROOT_DIR/anvil-state-$chain.json" | cut -d ' ' -f 1) = $HASH ]; do
         sleep 1
     done
+
+    sleep 20
 
     cp "$ROOT_DIR/anvil-state-$chain.json" "$chain_dir/anvil-state-$chain.json"
 

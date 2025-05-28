@@ -57,10 +57,7 @@ contract RegisterExternalVisionTokens is VisionBaseScript {
             visionHubProxy.registerExternalToken(
                 _visionTokenAddress,
                 uint256(otherBlockchain.blockchainId),
-                Strings.toHexString(
-                    uint256(uint160(_externalVisionTokenAddress)),
-                    20
-                )
+                vm.toString(_externalVisionTokenAddress)
             );
             console2.log(
                 "Vision externally registered on chain=%s; externalTokenAddress=%s",
@@ -93,10 +90,7 @@ contract RegisterExternalVisionTokens is VisionBaseScript {
                 visionHubProxy.registerExternalToken(
                     _visionTokenAddress,
                     uint256(otherBlockchain.blockchainId),
-                    Strings.toHexString(
-                        uint256(uint160(_externalVisionTokenAddress)),
-                        20
-                    )
+                    vm.toString(_externalVisionTokenAddress)
                 );
                 console2.log(
                     "VisionHub.registerExternalToken(%s, %s, %s)",
