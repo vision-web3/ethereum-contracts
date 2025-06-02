@@ -52,9 +52,9 @@ contract AccessController is AccessControl {
         mediumCriticalOps = mediumCriticalOps_;
         superCriticalOps = superCriticalOps_;
 
-        _grantRole(VisionRoles.PAUSER, pauser);
-        _grantRole(VisionRoles.DEPLOYER, deployer);
-        _grantRole(VisionRoles.MEDIUM_CRITICAL_OPS, mediumCriticalOps);
-        _grantRole(VisionRoles.SUPER_CRITICAL_OPS, superCriticalOps);
+        _grantRole(VisionRoles.PAUSER_ROLE, pauser);
+        _grantRole(VisionRoles.DEPLOYER_ROLE, deployer);
+        _grantRole(VisionRoles.MEDIUM_CRITICAL_OPS_ROLE, mediumCriticalOps);
+        _grantRole(VisionRoles.SUPER_CRITICAL_OPS_ROLE, superCriticalOps);
     }
 }
