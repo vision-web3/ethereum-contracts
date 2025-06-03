@@ -96,6 +96,26 @@ contract VisionTokenTest is VisionBaseTokenTest {
         assertTrue(visionToken.paused());
     }
 
+    function test_pause_AfterInitializationRandomUserReverts(
+        address _user
+    ) external {
+        vm.assume(_user != pauser);
+
+        setBridgeAtToken();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                _user,
+                visionToken.PAUSER_ROLE()
+            )
+        );
+        vm.prank(_user);
+        visionToken.pause();
+
+        assertFalse(visionToken.paused());
+    }
+
     function test_pause_WhenPaused() external {
         vm.prank(pauser);
         visionToken.pause();
@@ -108,19 +128,6 @@ contract VisionTokenTest is VisionBaseTokenTest {
             VisionToken.pause.selector
         );
         whenNotPausedTest(address(visionToken), calldata_);
-    }
-
-    function test_pause_ByNonPauser() external {
-        setBridgeAtToken();
-        bytes memory calldata_ = abi.encodeWithSelector(
-            VisionToken.pause.selector
-        );
-
-        onlyRoleAccessControlTest(
-            address(visionToken),
-            calldata_,
-            visionToken.PAUSER_ROLE()
-        );
     }
 
     function test_pause_ByOtherRolesReverts() public {
@@ -184,6 +191,26 @@ contract VisionTokenTest is VisionBaseTokenTest {
         );
     }
 
+    function test_unpause_RandomUserReverts(address _user) external {
+        vm.assume(_user != pauser && _user != criticalOps);
+
+        vm.prank(pauser);
+        visionToken.pause();
+
+        vm.prank(criticalOps);
+        visionToken.setVisionForwarder(VISION_FORWARDER_ADDRESS);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                _user,
+                visionToken.CRITICAL_OPS_ROLE()
+            )
+        );
+        vm.prank(_user);
+        visionToken.unpause();
+    }
+
     function test_unpause_ByOtherRolesReverts() public {
         address[4] memory otherRoles = [roleAdmin, minter, upgrader, pauser];
         vm.prank(pauser);
@@ -231,19 +258,28 @@ contract VisionTokenTest is VisionBaseTokenTest {
         whenPausedTest(address(visionToken), calldata_);
     }
 
-    function test_setVisionForwarder_ByNonOwner() external {
+    function test_setVisionForwarder_ByRandomUserRevert(
+        address _user
+    ) external {
+        vm.assume(_user != criticalOps);
+
         vm.prank(pauser);
         visionToken.pause();
 
-        bytes memory calldata_ = abi.encodeWithSelector(
-            VisionToken.setVisionForwarder.selector,
-            VISION_FORWARDER_ADDRESS
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                _user,
+                visionToken.CRITICAL_OPS_ROLE()
+            )
         );
 
-        onlyRoleAccessControlTest(
-            address(visionToken),
-            calldata_,
-            visionToken.CRITICAL_OPS_ROLE()
+        vm.prank(_user);
+        visionToken.setVisionForwarder(VISION_FORWARDER_ADDRESS);
+        assertEq(
+            visionToken.getVisionForwarder(),
+            address(0),
+            "Vision forwarder should not be set"
         );
     }
 
@@ -259,9 +295,17 @@ contract VisionTokenTest is VisionBaseTokenTest {
         assertEq("Vision", visionToken.name());
     }
 
-    function test_transfer_WhenPausedReverts() public {
+    function test_transfer_WhenPausedReverts(
+        uint32 _tokenAmount,
+        uint32 _transferAmount
+    ) public {
+        vm.assume(
+            _transferAmount <= _tokenAmount &&
+                _tokenAmount > 0 &&
+                _transferAmount > 0
+        );
         // Mint tokens to alice and ensure alice can transfer when not paused
-        setUser(alice, 1000 * TOKEN_UNIT);
+        setUser(alice, _tokenAmount * TOKEN_UNIT);
 
         // Pause the contract
         vm.startPrank(pauser);
@@ -271,13 +315,13 @@ contract VisionTokenTest is VisionBaseTokenTest {
         vm.startPrank(alice);
         // Attempt to transfer tokens while the contract is paused
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        visionToken.transfer(bob, 100 * TOKEN_UNIT);
+        visionToken.transfer(bob, _transferAmount * TOKEN_UNIT);
         vm.stopPrank();
 
         // Validate that balances remain unchanged
         assertEq(
             visionToken.balanceOf(alice),
-            1000 * TOKEN_UNIT,
+            _tokenAmount * TOKEN_UNIT,
             "alice's balance should not change"
         );
         assertEq(
@@ -287,9 +331,17 @@ contract VisionTokenTest is VisionBaseTokenTest {
         );
     }
 
-    function test_transfer_WhenUnpaused() public {
+    function test_transfer_WhenUnpaused(
+        uint32 _tokenAmount,
+        uint32 _transferAmount
+    ) public {
+        vm.assume(
+            _transferAmount <= _tokenAmount &&
+                _tokenAmount > 0 &&
+                _transferAmount > 0
+        );
         // Mint tokens to alice
-        setUser(alice, 1000 * TOKEN_UNIT);
+        setUser(alice, _tokenAmount * TOKEN_UNIT);
 
         // Pause the contract
         vm.prank(pauser);
@@ -298,7 +350,7 @@ contract VisionTokenTest is VisionBaseTokenTest {
         // Attempt to transfer tokens while paused
         vm.startPrank(alice);
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        visionToken.transfer(bob, 100 * TOKEN_UNIT);
+        visionToken.transfer(bob, _transferAmount * TOKEN_UNIT);
         vm.stopPrank();
 
         // Unpause the contract
@@ -307,51 +359,76 @@ contract VisionTokenTest is VisionBaseTokenTest {
 
         // Now that the contract is unpaused, the transfer should work
         vm.startPrank(alice);
-        bool success = visionToken.transfer(bob, 100 * TOKEN_UNIT);
+        bool success = visionToken.transfer(bob, _transferAmount * TOKEN_UNIT);
         assertTrue(success, "Transfer should be successful after unpause");
         vm.stopPrank();
 
         // Validate balances after transfer
         assertEq(
             visionToken.balanceOf(alice),
-            900 * TOKEN_UNIT,
+            (_tokenAmount - _transferAmount) * TOKEN_UNIT,
             "alice's balance should decrease"
         );
         assertEq(
             visionToken.balanceOf(bob),
-            100 * TOKEN_UNIT,
+            _transferAmount * TOKEN_UNIT,
             "bob's balance should increase"
         );
     }
 
-    function test_transfer() public {
+    function test_transfer(
+        uint32 _tokenAmount,
+        uint32 _transferAmount
+    ) public {
+        vm.assume(
+            _transferAmount <= _tokenAmount &&
+                _tokenAmount > 0 &&
+                _transferAmount > 0
+        );
         // Mint tokens to alice
         vm.startPrank(minter);
-        visionToken.mint(alice, 1000 * TOKEN_UNIT); // Mint 1000 tokens to alice
+        visionToken.mint(alice, _tokenAmount * TOKEN_UNIT); // Mint 1000 tokens to alice
         vm.stopPrank();
 
         // Alice transfers 100 tokens to bob
         vm.startPrank(alice);
-        bool success = visionToken.transfer(bob, 100 * TOKEN_UNIT); // Alice sends 100 tokens
+        bool success = visionToken.transfer(bob, _transferAmount * TOKEN_UNIT); // Alice sends 100 tokens
         assertTrue(success, "Transfer should be successful");
         vm.stopPrank();
 
         assertEq(
             visionToken.balanceOf(alice),
-            900 * TOKEN_UNIT,
-            "alice balance should decrease by 100 tokens"
+            (_tokenAmount - _transferAmount) * TOKEN_UNIT,
+            string.concat(
+                "alice balance should decrease by ",
+                vm.toString(_transferAmount),
+                " tokens"
+            )
         );
         assertEq(
             visionToken.balanceOf(bob),
-            100 * TOKEN_UNIT,
-            "bob balance should increase by 100 tokens"
+            _transferAmount * TOKEN_UNIT,
+            string.concat(
+                "bob balance should increase by ",
+                vm.toString(_transferAmount),
+                " tokens"
+            )
         );
     }
 
-    function test_transferFrom_UnapprovedAccountReverts() public {
+    function test_transferFrom_UnapprovedAccountReverts(
+        uint32 _tokenAmount,
+        uint32 _transferAmount
+    ) public {
+        vm.assume(
+            _transferAmount <= _tokenAmount &&
+                _tokenAmount > 0 &&
+                _transferAmount > 0
+        );
+
         // Mint tokens to alice
         vm.startPrank(minter);
-        visionToken.mint(alice, 1000 * TOKEN_UNIT); // Mint 1000 tokens to alice
+        visionToken.mint(alice, _tokenAmount * TOKEN_UNIT); // Mint 1000 tokens to alice
         vm.stopPrank();
 
         // Bob is not approved to spend alice's tokens, so the transfer should fail
@@ -361,20 +438,24 @@ contract VisionTokenTest is VisionBaseTokenTest {
                 IERC20Errors.ERC20InsufficientAllowance.selector,
                 bob,
                 0,
-                100 * TOKEN_UNIT
+                _transferAmount * TOKEN_UNIT
             )
         );
-        visionToken.transferFrom(alice, bob, 100 * TOKEN_UNIT); // Bob tries to transfer from Alice's account
+        // Bob tries to transfer from Alice's account
+        visionToken.transferFrom(alice, bob, _transferAmount * TOKEN_UNIT);
         vm.stopPrank();
     }
 
-    function test_transferFrom_WhenPausedReverts() public {
+    function test_transferFrom_WhenPausedReverts(
+        uint32 _tokenAmount,
+        uint32 _transferAmount
+    ) public {
         // Mint tokens to alice and approve bob to transfer from alice
-        setUser(alice, 1000 * TOKEN_UNIT);
-        setUser(bob, 1000 * TOKEN_UNIT);
+        setUser(alice, _tokenAmount * TOKEN_UNIT);
+        setUser(bob, _tokenAmount * TOKEN_UNIT);
 
         vm.prank(alice);
-        visionToken.approve(bob, 100 * TOKEN_UNIT);
+        visionToken.approve(bob, _transferAmount * TOKEN_UNIT);
 
         // Pause the contract
         vm.prank(pauser);
@@ -383,23 +464,23 @@ contract VisionTokenTest is VisionBaseTokenTest {
         vm.startPrank(bob);
         // Attempt to transferFrom while the contract is paused
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        visionToken.transferFrom(alice, charlie, 100 * TOKEN_UNIT);
+        visionToken.transferFrom(alice, charlie, _transferAmount * TOKEN_UNIT);
         vm.stopPrank();
 
         // Validate balances and allowance remain unchanged
         assertEq(
             visionToken.balanceOf(alice),
-            1000 * TOKEN_UNIT,
+            _tokenAmount * TOKEN_UNIT,
             "alice's balance should not change"
         );
         assertEq(
             visionToken.balanceOf(bob),
-            1000 * TOKEN_UNIT,
+            _tokenAmount * TOKEN_UNIT,
             "bob's balance should not change"
         );
         assertEq(
             visionToken.allowance(alice, bob),
-            100 * TOKEN_UNIT,
+            _transferAmount * TOKEN_UNIT,
             "allowance should remain unchanged"
         );
         assertEq(
@@ -409,8 +490,9 @@ contract VisionTokenTest is VisionBaseTokenTest {
         );
     }
 
-    function test_mint() public {
-        uint256 amount = 1000 * TOKEN_UNIT;
+    function test_mint(uint32 _tokenToMint) public {
+        vm.assume(_tokenToMint > 0);
+        uint256 amount = _tokenToMint * TOKEN_UNIT;
         setUser(bob, amount);
         setUser(charlie, amount);
         uint256 initialSupply = visionToken.totalSupply();
@@ -474,8 +556,9 @@ contract VisionTokenTest is VisionBaseTokenTest {
         );
     }
 
-    function test_mint_ToZeroAddressReverts() public {
-        uint256 mintAmount = 100 * TOKEN_UNIT;
+    function test_mint_ToZeroAddressReverts(uint64 _tokenToMint) public {
+        vm.assume(_tokenToMint > 0);
+        uint256 mintAmount = _tokenToMint * TOKEN_UNIT;
         vm.startPrank(minter);
         // Expect revert when minting to the zero address
         vm.expectRevert(
@@ -488,14 +571,15 @@ contract VisionTokenTest is VisionBaseTokenTest {
         vm.stopPrank();
     }
 
-    function test_mint_WhenPausedReverts() public {
+    function test_mint_WhenPausedReverts(uint64 _tokenToMint) public {
+        vm.assume(_tokenToMint > 0);
         vm.prank(pauser);
         visionToken.pause();
 
         // Attempt to mint new tokens while the contract is paused
         vm.startPrank(minter);
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        visionToken.mint(alice, 100 * TOKEN_UNIT);
+        visionToken.mint(alice, _tokenToMint * TOKEN_UNIT);
         vm.stopPrank();
 
         // Validate alice's balance remains unchanged
@@ -516,14 +600,19 @@ contract VisionTokenTest is VisionBaseTokenTest {
         assertEq(visionToken.totalSupply(), totalSupplyBefore);
     }
 
-    function test_mint_ByNonMinterRoleReverts() public {
+    function test_mint_ByRandomRoleReverts(
+        address _user,
+        uint64 _tokenToMint
+    ) public {
+        vm.assume(_user != minter && _tokenToMint > 0);
+
         uint totalSupplyBefore = visionToken.totalSupply();
-        uint256 amount = 100 * TOKEN_UNIT;
-        vm.startPrank(bob);
+        uint256 amount = _tokenToMint * TOKEN_UNIT;
+        vm.startPrank(_user);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
-                bob,
+                _user,
                 visionToken.MINTER_ROLE()
             )
         );
@@ -533,9 +622,10 @@ contract VisionTokenTest is VisionBaseTokenTest {
         assertEq(visionToken.balanceOf(alice), 0);
     }
 
-    function test_mint_ByOtherRolesReverts() public {
+    function test_mint_ByOtherRolesReverts(uint64 _tokenToMint) public {
+        vm.assume(_tokenToMint > 0);
         uint totalSupplyBefore = visionToken.totalSupply();
-        uint256 amount = 100 * TOKEN_UNIT;
+        uint256 amount = _tokenToMint * TOKEN_UNIT;
         address[4] memory otherRoles = [
             roleAdmin,
             pauser,
@@ -561,9 +651,10 @@ contract VisionTokenTest is VisionBaseTokenTest {
         }
     }
 
-    function test_mint_AfterRoleRevokedReverts() public {
+    function test_mint_AfterRoleRevokedReverts(uint64 _tokenToMint) public {
+        vm.assume(_tokenToMint > 0);
         uint totalSupplyBefore = visionToken.totalSupply();
-        uint256 amount = 100 * TOKEN_UNIT;
+        uint256 amount = _tokenToMint * TOKEN_UNIT;
         vm.startPrank(roleAdmin);
         visionToken.revokeRole(visionToken.MINTER_ROLE(), minter);
         vm.stopPrank();
@@ -582,11 +673,21 @@ contract VisionTokenTest is VisionBaseTokenTest {
         assertEq(visionToken.balanceOf(minter), 0);
     }
 
-    function test_mint_ToMultipleAddresses() public {
+    function test_mint_ToMultipleAddresses(
+        uint64 _tokenToMintAlice,
+        uint64 _tokenToMintBob,
+        uint64 _tokenToMintCharlie
+    ) public {
+        vm.assume(
+            _tokenToMintAlice > 0 &&
+                _tokenToMintBob > 0 &&
+                _tokenToMintCharlie > 0
+        );
+
         uint totalSupplyBefore = visionToken.totalSupply();
-        uint256 aliceMint = 100 * TOKEN_UNIT;
-        uint256 bobMint = 200 * TOKEN_UNIT;
-        uint256 charlieMint = 200 * TOKEN_UNIT;
+        uint256 aliceMint = _tokenToMintAlice * TOKEN_UNIT;
+        uint256 bobMint = _tokenToMintBob * TOKEN_UNIT;
+        uint256 charlieMint = _tokenToMintCharlie * TOKEN_UNIT;
 
         vm.startPrank(minter);
         visionToken.mint(alice, aliceMint);
@@ -617,12 +718,20 @@ contract VisionTokenTest is VisionBaseTokenTest {
         );
     }
 
-    function test_permit() public {
-        setUser(alice, 1000 * TOKEN_UNIT);
-        setUser(bob, 1000 * TOKEN_UNIT);
+    function test_permit(
+        uint64 _initTokenAmount,
+        uint64 _amountToPermit
+    ) public {
+        vm.assume(
+            _initTokenAmount > 0 &&
+                _amountToPermit > 0 &&
+                _amountToPermit <= _initTokenAmount
+        );
+        setUser(alice, _initTokenAmount * TOKEN_UNIT);
+        setUser(bob, _initTokenAmount * TOKEN_UNIT);
         uint256 nonce = visionToken.nonces(alice);
         uint256 deadline = block.timestamp + 1 days;
-        uint256 amount = 100 * TOKEN_UNIT;
+        uint256 amount = _amountToPermit * TOKEN_UNIT;
 
         (uint8 v, bytes32 r, bytes32 s) = signPermit(
             alice,
